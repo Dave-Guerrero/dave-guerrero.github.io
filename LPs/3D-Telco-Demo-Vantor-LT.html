@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vantor | Next-gen 3D geodata for next-gen networks</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/wow/1.1.2/wow.min.js"></script>
+
+    <link rel="shortcut icon" href="https://storage.pardot.com/1084652/1755889944pJU5BrVO/favicon__1_.ico">
+    <link rel="icon" href="https://storage.pardot.com/1084652/1755889944pJU5BrVO/favicon__1_.ico" type="image/x-icon" >
+    <style>
+/* ESTILOS PRINCIPALES */
+        /* Fuentes TWKEverett */
+        @font-face {
+            font-family: 'TWKEverett';
+            src: url('https://dave-guerrero.github.io/TWKEverett-Regular.woff2') format('woff2');
+            font-weight: 400; /* Regular */
+            font-style: normal;
+        }
+
+        @font-face {
+            font-family: 'TWKEverett';
+            src: url('https://dave-guerrero.github.io/TWKEverett-RegularItalic-web.woff2') format('woff2');
+            font-weight: 400; /* Regular */
+            font-style: italic;
+        }
+
+        @font-face {
+            font-family: 'TWKEverett';
+            src: url('https://dave-guerrero.github.io/TWKEverett-Medium.woff2') format('woff2');
+            font-weight: 500; /* Medium */
+            font-style: normal;
+        }
+
+        /* Estilos de uso para el body y algunos elementos */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: black;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'TWKEverett', sans-serif;
+            font-weight: 500; /* Medium por defecto para títulos */
+        }
+
+        p{
+            font-family: Inter;
+            font-weight: 400;
+            font-size: 16px;
+            line-height: 145%;
+            letter-spacing: -0.5px;
+        }
+
+        .b-500{
+            font-weight: 500;
+        }
+
+        .sec-title{
+            color: #CCCCCC;
+            font-weight: 500;
+            font-family: 'TWKEverett', sans-serif;
+        }
+
+        .row {
+            --bs-gutter-x: 0;
+            --bs-gutter-y: 0;
+        }
+
+        .white{
+            color: white;
+        }
+
+
+@media screen and (min-device-width: 320px) and (max-device-width: 768px) {
+.use-cases-section .left-content h2 {
+    font-size: 2.4rem !important;
+}
+
+h1{
+    font-size: 4rem !important;
+}
+
+.gallery-section {
+    height: 50vh !important;
+}
+
+#prime-sec::after {
+    width: 0px !important;
+}
+
+.product-name {
+    font-size: 1.5rem !important;
+}
+
+.back-hero {
+    height: 30vh !important;
+}
+
+.content-section {
+    padding: 3rem 0 !important;
+}
+}
+
+/* ESTILOS PRINCIPALES END*/
+
+/* Estilo del botón CTA-1 */
+.cta-button {
+    background-color: transparent;
+    color: #fff;
+    padding: 1rem 2rem;
+    font-size: 16px;
+    border: none;
+    font-family: 'TWKEverett', sans-serif;
+    font-weight: 500;
+    text-decoration: none;
+    position: relative;
+    display: inline-block;
+    overflow: hidden;
+    z-index: 2; /* Asegura que el botón esté encima del fondo */
+    
+    /* Transición para el cambio de color */
+    transition: all 0.3s ease, background-color 0.7s ease;
+}
+
+/* Pseudo-elemento para el fondo del hover */
+.cta-button::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    
+    /* SVG de fondo de hover (cuadrado púrpura) */
+    background: 
+        /* Esquina superior izquierda */
+        url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNzIiIGhlaWdodD0iMjciIHZpZXdCb3g9IjAgMCA3MiAyNyIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjcyIiBoZWlnaHQ9IjI3IiBmaWxsPSIjOEUwREQxIiBmaWxsLW9wYWNpdHk9IjAuNTMiLz4KPC9zdmc+Cg==') no-repeat top left,
+
+        /* Esquina inferior izquierda */
+        url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNzIiIGhlaWdodD0iMjciIHZpZXdCb3g9IjAgMCA3MiAyNyIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjcyIiBoZWlnaHQ9IjI3IiBmaWxsPSIjOEUwREQxIiBmaWxsLW9wYWNpdHk9IjAuNTMiLz4KPC9zdmc+Cg==') no-repeat bottom left,
+        
+        /* Esquina superior derecha */
+        url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNzIiIGhlaWdodD0iMjciIHZpZXdCb3g9IjAgMCA3MiAyNyIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjcyIiBoZWlnaHQ9IjI3IiBmaWxsPSIjOEUwREQxIiBmaWxsLW9wYWNpdHk9IjAuNTMiLz4KPC9zdmc+Cg==') no-repeat top right,
+        
+        /* Esquina inferior derecha */
+        url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNzIiIGhlaWdodD0iMjciIHZpZXdCb3g9IjAgMCA3MiAyNyIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjcyIiBoZWlnaHQ9IjI3IiBmaWxsPSIjOEUwREQxIiBmaWxsLW9wYWNpdHk9IjAuNTMiLz4KPC9zdmc+Cg==') no-repeat bottom right;
+
+    background-size: 40%; /* Cubre todo el botón */
+    
+    opacity: 0;
+    z-index: -1; /* Se queda detrás del contenido del botón */
+    background-color: transparent;
+    transition: all 0.3s ease, background-color 0.7s ease;
+}
+
+/* SVGs de las esquinas en estado normal */
+.cta-button::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    
+    background:
+        /* Esquina superior izquierda */
+        url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iOSIgaGVpZ2h0PSI5IiB2aWV3Qm94PSIwIDAgOSA5IiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxwYXRoIGQ9Ik0wIDBWOUgxVjFIOVYwSDBaIiBmaWxsPSJ3aGl0ZSIvPjwvc3ZnPg==') no-repeat top left,
+
+        /* Esquina inferior izquierda */
+        url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iOSIgaGVpZ2h0PSI5IiB2aWV3Qm94PSIwIDAgOSA5IiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgo8cGF0aCBkPSJNMCA5TC03Ljg2ODA1ZS0wNyAtMS42Njg2OWUtMDdMMSAtMi41NDI5MmUtMDdMMSA4TDkgOEw5IDlMMCA5WiIgZmlsbD0id2hpdGUiLz4KPC9zdmc+Cg==') no-repeat bottom left,
+        
+        /* Esquina superior derecha */
+        url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iOSIgaGVpZ2h0PSI5IiB2aWV3Qm94PSIwIDAgOSA5IiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxwYXRoIGQ9Ik05IDBWOUg4VjFIMFYwSDlaIiBmaWxsPSJ3aGl0ZSIvPjwvc3ZnPg==') no-repeat top right,
+        
+        /* Esquina inferior derecha */
+        url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iOSIgaGVpZ2h0PSI5IiB2aWV3Qm94PSIwIDAgOSA5IiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxwYXRoIGQ9Ik05IDlWMDBIOFY4SDBWOUg5WiIgZmlsbD0id2hpdGUiLz48L3N2Zz4=') no-repeat bottom right;
+
+    opacity: 1;
+    transition: all 0.3s ease, background-color 0.7s ease;
+}
+
+.cta-button:hover {
+    background-color: #8E0DD1;
+}
+
+/* Efecto al pasar el mouse */
+.cta-button:hover::before {
+    opacity: 1; /* El fondo púrpura se vuelve visible */
+}
+.cta-button:hover::after {
+    opacity: 0; /* Las esquinas de SVG desaparecen */
+}
+
+/* Estilo del botón CTA-1 end*/
+
+
+        /* Estilo para el navbar transparente */
+        .navbar-transparent {
+            /* Asegura que el navbar esté al frente del contenido */
+            z-index: 2;
+            border-bottom: 1px solid rgb(221 221 221 / 30%);
+        }
+
+        .navbar-black {
+            z-index: 2;
+            border-bottom: 1px solid rgb(221 221 221 / 30%);
+            background-color: #000000;
+        }
+        /* Estilo para el navbar transparente end*/
+
+
+
+        /* Estilos para la sección hero */
+            
+        .back-hero {
+            background-position: center;
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Pseudo-elemento para la imagen de fondo */
+        .back-hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('https://storage.pardot.com/1084652/1731372270DmHCC0E3/156703_Webinar_graphics_Vricon_3D_Marketo_Header_1050x897.jpg');
+            background-position: center;
+            background-size: cover;
+            background-repeat: no-repeat;
+            z-index: 1;
+            
+        }
+
+
+
+        /* Estilos para la sección hero end */
+
+
+        /* Estilo para la nueva sección #1 de contenido */
+        .content-section {
+            background-color: #000;
+            color: #fff;
+            padding: 8rem 0; /* Espaciado superior e inferior para que el contenido no esté pegado */
+            text-align: center; /* Centra todo el contenido de la sección */
+        }
+
+        .main-title {
+            font-family: 'TWKEverett', sans-serif;
+            font-weight: 500;
+            max-width: 800px;
+            margin: 0 auto; /* Centra el título */
+        }
+
+        .description {
+            font-family: 'Inter', sans-serif;
+            font-weight: 400;
+            font-size: 1.1rem;
+            max-width: 1240px; /* Limita el ancho del párrafo para mejor legibilidad */
+            margin: 2rem auto 0; /* Espaciado superior y centrado */
+        }
+      /* Estilo para la nueva sección #1 de contenido end*/
+
+
+/* Estilos para la sección #7 */
+.form-section {
+    background-color: #000;
+    color: #fff;
+    min-height: 80vh; /* Ajusta la altura de la sección para que se vea bien */
+    display: flex;
+    align-items: center;
+}
+
+.text-content {
+    max-width: 600px; /* Limita el ancho del texto para un mejor diseño */
+}
+
+.form-container {
+    width: 100%;
+    height: auto; /* Altura del contenedor del formulario */
+    /* Puedes ajustar el color y otros estilos según tu formulario */
+}
+
+.form-section h2 h3{
+    font-weight: 500;
+}
+/* Estilos para la sección #7 end*/
+
+
+/* Estilos para la sección footer */
+.vantor-footer {
+    background-color: #fff;
+    color: #000;
+}
+
+.footer-top-row {
+    position: relative;
+}
+
+
+#prime-sec {
+    position: relative;
+}
+
+#prime-sec::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0; /* Esto posiciona el borde a la derecha */
+    bottom: 0; 
+    width: 2px;
+    background-color: #e9ecef;
+}
+
+.footer-top-row::before {
+    left: 0;
+}
+
+.footer-top-row::after {
+    right: 0;
+}
+
+.footer-divider {
+    border-top: 2.5px solid #DDDDDD;
+    margin-top: 0;
+    margin-bottom: 1rem;
+}
+
+.red-divider {
+    border-color: #DDDDDD;
+}
+
+.vantor-logo-img {
+    width: 14.5rem;
+    height: 3.5rem;
+}
+
+.social-icons-list .list-inline-item:not(:last-child) {
+    margin-right: 1rem;
+}
+
+.social-icon-link {
+    display: inline-block;
+    transition: opacity 0.3s ease;
+}
+
+.social-icon-link:hover {
+    opacity: 0.7;
+}
+
+.social-icon-img {
+    width: 3rem;
+    height: 3rem;
+}
+
+.footer-link {
+    color: #000;
+    text-decoration: none;
+    font-size: 1rem;
+    transition: opacity 0.3s ease;
+}
+
+.footer-link:hover {
+    opacity: 0.7;
+}
+
+.copyright-text {
+    font-size: 0.8rem;
+    color: #6c757d;
+}
+
+.sec-title{
+            color: #CCCCCC;
+            font-weight: 500;
+            font-family: 'TWKEverett', sans-serif;
+        }
+
+/* Estilo para la nueva sección #4 de contenido */
+        .advantage-section {
+            background-color: #000;
+            color: #fff;
+            padding-top: 5rem;
+            padding-bottom: 5rem;
+        }
+
+        .advantage-section .section-title {
+            font-family: 'Inter', sans-serif;
+            font-weight: 400;
+            font-size: 1rem;
+            margin-bottom: 3rem;
+            padding-left: 1rem; /* Alinea con el borde del contenido */
+        }
+
+        .advantage-section .advantage-item {
+            padding: 2rem;
+        }
+
+        .advantage-section .advantage-item-title {
+            font-family: 'TWKEverett', sans-serif;
+            font-weight: 500;
+            font-size: 1.75rem;
+            margin-top: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .advantage-section .advantage-item-text {
+            font-family: 'Inter', sans-serif;
+            font-weight: 400;
+            font-size: 1rem;
+        }
+
+        /* Estilo para la línea divisoria de la cuadrícula */
+        .advantage-section .divider-row {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        /*Estilo para la nueva sección #4 de contenido end*/
+        
+.iframe-container {
+    position: relative;
+    width: 100%;
+    height: 60vh; 
+    overflow: hidden;
+}
+
+.iframe-container iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+}
+/* Estilos para la sección footer end*/
+    </style>
+</head>
+<body>
+
+
+<nav class="navbar navbar-dark navbar-expand-lg position-absolute top-0 w-100 p-4 navbar-black">
+        <div class="container-fluid px-3 px-lg-5">
+            <a class="navbar-brand px-0 px-lg-3 wow animate__animated animate__fadeInLeft" data-wow-duration="0.7s" data-wow-delay="0.5s" href="#">
+                <img src="https://go.vantor.com/l/1084652/2025-08-20/7ksrdb/1084652/1755729739YDtnIfwt/Logo_Vantor_x2.svg" alt="Vantor Logo" class="img-fluid">
+            </a>
+        </div>
+    </nav>
+<section class="px-0 py-0" style="background-color: #000000;">
+    <div class="container-fluid p-0">
+        <div class="row pt-5 pt-md-0">
+            <div class="col-lg-6 d-flex flex-column justify-content-between text-white p-4 p-md-5 wow animate__fadeInUp" data-wow-duration="1s">
+                <div class="p-2 p-md-5 mt-md-2">
+                <p class="sec-title px-0 mt-5 wow animate__animated animate__fadeInUp" data-wow-duration="0.7s" data-wow-delay="0.3s">&nbsp;</p>
+                    <h2 class="display-3 b-500 wow animate__animated animate__fadeInUp" data-wow-duration="0.8s" data-wow-delay="0.4s">NEXT-GEN 3D GEODATA</h2>
+                </div>
+
+                <div class="p-2 p-md-5">
+                    <div class="cta-container wow animate__animated animate__fadeInUp" data-wow-duration="0.8s" data-wow-delay="0.8s">
+                    <p class="mt-4 mb-5">Quality 3D Geodata at scale to help you efficiently plan and maintain the networks of tomorrow</p>
+                        <a href="#form" class="cta-button wow animate__animated animate__fadeInUp" data-wow-duration="1.2s" data-wow-delay="0.5s">Request a demo</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="back-hero col-lg-6 d-flex align-items-center justify-content-center p-0">
+            </div>
+        </div>
+    </div>
+</section>
+<section class="content-section">
+    <div class="container wow animate__animated animate__fadeInUp" data-wow-duration="0.8s" data-wow-delay="0.5s">
+        <h2 class="main-title display-5">
+            Complex new technologies require precise solutions
+        </h2>
+        <p class="description">As 5G, fixed wireless access (FWA) and other wireless networking technologies advance, network planners are faced with increasing challenges posed by new trends, such as high-frequency spectrum usage and proliferation of small cells across suburban morphologies. The level of model fidelity needed to optimize these networks to improve coverage, bandwidth and latency has drastically increased—as has the sensitivity of these models to urban change. This level of detail was not required for previous technologies.
+        </p>
+        <p class="description">
+            Successful planning and deployment for 5G will rely on network models that are based on detailed input geodata covering vast market territories, consisting of accurate buildings and vegetation, over urban and suburban morphologies—in full 3D. Access to cost-effective, current, accurate and highly detailed geodata for use in your planning software is critical to help you achieve optimal use of network infrastructure investment and accelerate your network rollouts.</p>
+    </div>
+    </section>
+<section class="px-0 py-0">
+    <div class="container-fluid px-0">
+        <div class="row flex-column-reverse flex-md-row">
+
+            <div class="col-lg-6 d-flex align-items-center justify-content-center p-0 wow animate__fadeInLeft" data-wow-duration="1s">
+                <script src="https://fast.wistia.com/player.js" async></script><script src="https://fast.wistia.com/embed/fpq022h4it.js" async type="module"></script><style>wistia-player[media-id='fpq022h4it']:not(:defined) { background: center / contain no-repeat url('https://fast.wistia.com/embed/medias/fpq022h4it/swatch'); display: block; filter: blur(5px); padding-top:56.25%; height:100%; }</style> <wistia-player media-id="fpq022h4it" aspect="1.7777777777777777"></wistia-player>
+            </div>
+
+            <div class="col-lg-6 d-flex flex-column justify-content-center text-white p-4 p-md-5 wow animate__fadeInRight" data-wow-duration="1s">
+                <div class="text-contents py-5 px-2 px-md-5">
+
+                <div class="mb-4">
+                    <h3 class="display-6 b-500 wow animate__animated animate__fadeInRight" data-wow-duration="0.6s" data-wow-delay="0.3s">Quality, Scale and Speed your Network demands</h3>
+                </div>
+                
+                <div class="mb-4">
+                    <p class="mt-2 mb-5 wow animate__animated animate__fadeInRight" data-wow-duration="0.8s" data-wow-delay="0.4s">Vantor owns and operates the most sophisticated commercial imaging satellite constellation in orbit, collecting and quickly delivering premium-quality imagery and derived 3D geodata. The Vivid Terrain Telco Suite is automatically built from our high-resolution satellite imagery, using advanced algorithms and AI techniques with consistent quality and accuracy at regional, national or global scale.</p>
+                </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+<section class="px-0 py-0">
+    <div class="container-fluid px-0">
+        <div class="row">
+            <div class="col-lg-6 d-flex flex-column justify-content-center text-white p-4 p-md-0 wow animate__fadeInLeft" data-wow-duration="1s">
+                <div class="text-content py-5 px-2 px-md-5">
+
+                <div class="mb-4">
+                    <h3 class="display-6 b-500 wow animate__animated animate__fadeInLeft" data-wow-duration="0.6s" data-wow-delay="0.3s">
+                        Next-generation 3D Geodata for modern Networks
+                    </h3>
+                </div>
+                
+                <div class="mb-4">
+                    <p class="mt-2 mb-5 wow animate__animated animate__fadeInLeft" data-wow-duration="0.8s" data-wow-delay="0.4s">
+The Vivid Terrain Telco Suite is a scalable solution providing the highest-quality 3D geodata optimized for improving or planning modern networks. It contains all the data layers you need to perform detailed analysis for the most demanding environments.</p>
+                </div>
+
+                </div>
+            </div>
+
+<div class="col-lg-6 d-flex align-items-center justify-content-center p-0 wow animate__fadeInRight" data-wow-duration="1s">
+    <div class="iframe-container">
+        <iframe data-src="https://d1knem8ohzg350.cloudfront.net/atlanta-telco.html"></iframe>
+    </div>
+</div>
+        </div>
+    </div>
+</section>
+<section class="content-section pb-5">
+    <div class="container wow animate__animated animate__fadeInUp" data-wow-duration="0.8s" data-wow-delay="0.5s">
+        <h3 class="main-title display-6">3D Geodata for the most demanding applications</h3>
+    </div>
+    </section>
+    
+<section class="advantage-section px-3 px-lg-5 py-3">
+    <div class="container-fluid px-3 px-lg-5">
+        <div class="row pb-5 mb-0">
+
+            <div class="col-md-6 advantage-item wow animate__animated animate__fadeInLeft" data-wow-duration="0.6s" data-wow-delay="0.5s">
+                <img src="https://go.vantor.com/l/1084652/2025-08-20/7ksrfj/1084652/1755732850P48haiEt/X_1.svg" alt="Icono 1" class="mb-3">
+                <h3 class="advantage-item-title">
+                    RAN design and optimization
+                </h3>
+                <p class="advantage-item-text">The Telco RF Bundle offers the most comprehensive dataset, providing reliable and consistent 3D vector accuracy on both horizontal position and height anywhere on Earth, including detailed representations of vegetation and even 4D bridges.</p>
+            </div>
+
+            <div class="col-md-6 advantage-item wow animate__animated animate__fadeInRight" data-wow-duration="0.7s" data-wow-delay="0.5s">
+                <img src="https://go.vantor.com/l/1084652/2025-08-20/7ksrfq/1084652/1755732960NbDlkvRY/Global.svg" alt="Icono 2" class="mb-3">
+                <h3 class="advantage-item-title">
+                    Microwave link planning
+                </h3>
+                <p class="advantage-item-text">The Telco Link Bundle offers the most accurate and cost-effective clutter height solution for detailed fixed wireless access and microwave link planning, with one unique height value for each individual pixel. It supports both point-to-point and point-to-multipoint scenarios. Customers can opt for high-res 2.5D or full 3D, receiving the data rapidly and at large scales.</p>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+
+<section class="px-0 py-0">
+    <div class="container-fluid px-0">
+        <div class="row flex-column-reverse flex-md-row">
+
+            <div class="col-lg-6 d-flex align-items-center p-0 wow animate__fadeInLeft" data-wow-duration="1s">
+    
+           <div class="img-fluid w-100">
+            <link href="https://go.vantor.com/l/1084652/2024-12-06/7k4ftn/1084652/1733506271S21sUNBH/BeerSlider26.css" rel="stylesheet">
+            <script src="https://go.vantor.com/l/1084652/2024-12-06/7k4ftr/1084652/1733506271zrlwypYs/BeerSlider26.js"></script>
+            <div id="slide-125610" class="beer-slider" data-beer-label="After">
+              <img src="https://storage.pardot.com/1084652/1757532571vZodfI48/2020_clip.jpg">
+              <div class="beer-reveal" data-beer-label="Before">
+                <img src="https://storage.pardot.com/1084652/1757532571LsJu9fp2/2011_clip.jpg">
+              </div>
+            </div>
+            <script>
+              new BeerSlider(document.getElementById("slide-125610"))
+            </script>
+          </div>
+
+
+            </div>
+
+            <div class="col-lg-6 d-flex flex-column justify-content-center text-white p-4 p-md-5 wow animate__fadeInRight" data-wow-duration="1s">
+                <div class="text-content py-5 px-2 px-md-2 px-xl-3 px-xxl-4">
+
+                <div class="mb-4">
+                    <h3 class="display-6 b-500 wow animate__animated animate__fadeInRight" data-wow-duration="0.6s" data-wow-delay="0.3s">
+                        Keep up with change in the race to 5G and beyond
+                    </h3>
+                </div>
+                
+                <div class="mb-4">
+                    <p class="mt-2 mb-5 wow animate__animated animate__fadeInRight" data-wow-duration="0.8s" data-wow-delay="0.4s">
+                      With our WorldView Legion fleet of satellites, Vantor has an unprecedented feed of daily satellite imagery, giving us the ability to more closely track the real-world changes affecting your markets and to deliver updates on an accelerated schedule. Additionally, our advanced change-detection capabilities can identify where new development is happening before network failures occur, making your network optimization proactive instead of reactive.
+<br><br>
+With our change-detection capabilities, you can identify new construction well before the structures become occupied, allowing network operators to expand or modify their networks before customers experience connectivity issues arise.
+<br><br>
+Areas in red display change that occurred over the last 12 months, automatically detected.
+                    </p>
+                </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+
+<section class="form-section py-5 px-3 px-lg-5">
+    <div class="container-fluid px-3 px-lg-5">
+        <div class="row d-flex align-items-start">
+
+            <div  id="form" class="col-md-6 d-flex flex-column justify-content-center pe-md-5 mb-4 mb-md-0 wow animate__animated animate__fadeInLeft" data-wow-duration="0.5s" data-wow-delay="0.5s">
+                <div class="text-content">
+                    <h2 class="display-4 mb-4">Request a demo</h2>
+                    <p class="lead text-white-50">Remote or urban, 4G, LTE or 5G and beyond—fill out the form to get
+in touch with one of our 3D geodata experts and get a demo tailored to your network challenges and interests.
+</p>
+                </div>
+            </div>
+
+            <div class="col-md-6 d-flex justify-content-center align-items-center ps-md-5 wow animate__animated animate__fadeInUp" data-wow-duration="0.7s" data-wow-delay="0.5s">
+                <div class="form-container">
+                    <img class="img-fluid" style="" src="https://go.vantor.com/l/1084652/2025-10-24/7kzll1/1084652/1761325188ycGfv4n3/formimage.png">
+                    </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<footer class="vantor-footer">
+    <div class="container-fluid p-0 wow animate__animated animate__fadeInUp" data-wow-duration="0.8s" data-wow-delay="0.5s">
+        <div class="row align-items-center mb-0 footer-top-row px-3 px-lg-5">
+            <div id="prime-sec" class="col-12 col-md-6 col-lg-7 col-xl-7 col-xxl-7 mb-3 mb-md-0 py-4 py-md-5">
+                <div class="d-flex align-items-center">
+                    <img src="https://go.vantor.com/l/1084652/2025-08-21/7ksvqj/1084652/1755819414C0RvIRty/Vantor_h_w_1.svg" alt="Vantor Logo" class="vantor-logo-img me-2">
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col-lg-5 col-xl-5 col-xxl-5 text-start text-lg-end">
+                <ul class="list-inline social-icons-list m-0 mb-3 mb-md-0 text-start text-md-center">
+                    <li class="list-inline-item me-1 me-md-3 me-xl-3 me-xxl-5"><a href="#" class="social-icon-link"><img src="https://go.vantor.com/l/1084652/2025-08-21/7ksvlf/1084652/1755815295KYeJGbnZ/Youtube.svg" alt="YouTube" class="social-icon-img"></a></li>
+                    <li class="list-inline-item me-1 me-md-3 me-xl-3 me-xxl-5"><a href="#" class="social-icon-link"><img src="https://go.vantor.com/l/1084652/2025-08-21/7ksvlj/1084652/1755815295gEztPVSv/Facebook.svg" alt="Facebook" class="social-icon-img"></a></li>
+                    <li class="list-inline-item me-1 me-md-3 me-xl-3 me-xxl-5"><a href="#" class="social-icon-link"><img src="https://go.vantor.com/l/1084652/2025-08-21/7ksvlq/1084652/17558152950pgntell/Instagram.svg" alt="Instagram" class="social-icon-img"></a></li>
+                    <li class="list-inline-item me-1 me-md-3 me-xl-3 me-xxl-5"><a href="#" class="social-icon-link"><img src="https://go.vantor.com/l/1084652/2025-08-21/7ksvlm/1084652/1755815295wAswgL3W/Linkedin.svg" alt="LinkedIn" class="social-icon-img"></a></li>
+                    <li class="list-inline-item me-1 me-md-3 me-xl-3 me-xxl-5"><a href="#" class="social-icon-link"><img src="https://go.vantor.com/l/1084652/2025-08-21/7ksvlt/1084652/1755815296pLOjk4bM/X.svg" alt="X" class="social-icon-img"></a></li>
+                </ul>
+            </div>
+        </div>
+
+        <hr class="footer-divider red-divider">
+
+        <div class="row align-items-center pt-2 px-3 px-lg-5">
+            <div class="col-12 col-md-12 py-4">
+                <ul class="list-inline m-0">
+                    <li class="list-inline-item me-1 me-md-4"><a href="#" class="footer-link">Privacy Policy</a></li>
+                    <li class="list-inline-item"><a href="#" class="footer-link">Terms & Services</a></li>
+                    <li class="list-inline-item"><p id="copyright-year" class="footer-link ps-0 ps-md-4" style="color: #686868">© Vantor</p></li>
+                </ul>
+                
+            </div>
+        </div>
+    </div>
+</footer>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const copyrightElement = document.getElementById('copyright-year');
+        const currentYear = new Date().getFullYear();
+        copyrightElement.textContent = `© ${currentYear} Vantor`;
+    });
+    </script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Selecciona todos los iframes que queremos cargar de forma diferida.
+        const lazyIframes = document.querySelectorAll('iframe[data-src]');
+
+        // Configura el IntersectionObserver.
+        const observer = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                // Si el iframe es visible en la pantalla (intersecting).
+                if (entry.isIntersecting) {
+                    const iframe = entry.target;
+                    const src = iframe.getAttribute('data-src');
+
+                    // Si el iframe tiene una URL en data-src, la carga.
+                    if (src) {
+                        iframe.src = src;
+                        // Elimina el atributo para que no se cargue de nuevo.
+                        iframe.removeAttribute('data-src');
+                    }
+
+                    // Deja de observar este iframe, ya no es necesario.
+                    observer.unobserve(iframe);
+                }
+            });
+        });
+
+        // Observa cada iframe para saber cuándo entra en el viewport.
+        lazyIframes.forEach(iframe => {
+            observer.observe(iframe);
+        });
+    });
+</script>
+
+
+<script>
+    new WOW().init();
+</script>
+</body>
+</html>
