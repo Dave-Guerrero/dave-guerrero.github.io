@@ -24,6 +24,43 @@
   <link href="assets/css/main.css" rel="stylesheet">
 
   <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/1.12.0/model-viewer.min.js"></script>
+  <style type="text/css">
+    #contact .profile-img img {
+        width: 250px;
+        height: 250px;
+        object-fit: cover;
+        border: 7px solid color-mix(in srgb, var(--accent-color), transparent 85%);
+        border-radius: 50% !important;
+        opacity: 0.9;
+        filter: grayscale(0.9) brightness(1.3);
+    }
+
+    #contact .btn.btn-outline {
+    background-color: transparent;
+    color: var(--default-color);
+    border-color: color-mix(in srgb, var(--default-color), transparent 70%);
+    width: 80%;
+    text-align: center;
+    }
+
+    #contact .btn.btn-outline:hover {
+    border-color: var(--accent-color);
+    transform: translateY(-2px);
+    }
+
+    #contact  .btn.btn-primary {
+    background-color: var(--accent-color);
+    color: #1f1f1f;
+    border: unset;
+    width: 80%;
+    }
+
+    #contact  .btn.btn-primary:hover {
+    background-color: color-mix(in srgb, var(--accent-color), black 15%);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px color-mix(in srgb, var(--accent-color), transparent 60%);
+    }
+  </style>
 
   </head>
 
@@ -1204,10 +1241,10 @@ Explore my work in interface design, front-end development, and SEO campaigns th
       </div><div class="container">
 
         <div class="row g-4 g-lg-5">
-          <div class="col-lg-5">
+          <div class="col-md-5">
             <div class="info-box">
               <h3>Contact Information</h3>
-              <p>You can contact me directly by email or phone. I'm also active on LinkedIn.</p>
+              <p>You can contact me directly by email or phone.</p>
 
               <div class="info-item">
                 <div class="icon-box">
@@ -1242,44 +1279,37 @@ Explore my work in interface design, front-end development, and SEO campaigns th
             </div>
           </div>
 
-          <div class="col-lg-7">
+          <div class="col-md-7">
             <div class="contact-form">
               <h3>Get in Touch</h3>
               <p>Send a message to discuss a project, collaboration, or job opportunity.</p>
 
-              <div class="container jf-form">
-    
-    <form action="forms/admin.php" method="post" class="php-email-form">
-        <div class="row gy-4">
+              <div class="row align-items-center justify-content-center">
 
-            <div class="col-12 px-0"> 
-                <input type="text" name="name" class="form-control" placeholder="Your Name" required="">
-            </div>
+              <div class="col-md-5">  
+              <div class="profile-img mb-5 mt-4">
+                <img src="assets/img/profile/dave-gif.gif" alt="Profile" class="img-fluid rounded">
+              </div>
+              </div>
 
-            <div class="col-12 px-0">
-                <input type="email" class="form-control" name="email" placeholder="Email" required="">
-            </div>
+              <div class="col-md-7">  
+              <a href="https://wa.me/573155014556?text=Hi%20Dave,%20I'd%20like%20to%20talk%20to%20you" target="_blank" class="btn btn-primary px-4 text-center">
+                  <i class="bi bi-chat-dots"></i>
+                  Let's chat instantly 
+                </a>
 
-            <div class="col-12 px-0">
-                <textarea class="form-control" name="message" rows="6" placeholder="Comments" required=""></textarea>
-            </div>
+                <a href="https://www.linkedin.com/in/dave-guerrero-creative/" target="_blank" class="mt-4 btn btn btn-outline px-4 text-center">
+                  <i class="bi bi-linkedin"></i>
+                  I'm also active on LinkedIn.
+                </a>
 
-            <div class="col-12 px-0 text-start">
-                <div class="loading">Loading</div>
-                <div class="error-message">Error please check</div>
-                <div class="sent-message">Your message has been sent. Thank you!</div>
+                
+              </div>
 
-                <button type="submit" class="btn-form">Submit</button>
-            </div>
 
-        </div>
-    </form>
-    <div class="clearfix"></div> 
-</div>
+             </div>
 
-<div class="container jf-thankyou" style="display:none;" data-redirect="" data-seconds="10">
-    <h5 class="mt-4">Your form has been submitted. Thank You!</h5>
-</div>
+
 
             </div>
           </div>
