@@ -1,0 +1,3602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Constellation Expansion Launch — Campaign Performance Dashboard</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=DM+Serif+Display:ital@0;1&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    /* Reference dashboard palette */
+    --navy: #0a0f2c;
+    --dark: #0f1f4b;
+    --blue: #1a5fd4;
+    --sky: #4e9af1;
+    --light-blue: #a8cff8;
+
+    --bg: #f0f3f9;
+    --surface: #FFFFFF;
+    --surface-tint: #e8edf5;
+    --border: #dde4f0;
+    --border-strong: #c5d0e3;
+
+    --ink: #0a0f2c;
+    --ink-soft: #1f2a4d;
+    --muted: #6b7a99;
+    --faint: #94a3b8;
+
+    --green: #2ecc71;
+    --green-deep: #1a7a40;
+    --green-wash: #eafaf1;
+    --red: #e74c3c;
+    --red-wash: #fdf0f0;
+    --amber: #f39c12;
+    --amber-deep: #956500;
+    --amber-wash: #fffbeb;
+    --teal: #1abc9c;
+    --purple-accent: #8e44ad;
+
+    /* Legacy aliases — map old purple usage to blue so nothing breaks */
+    --purple: var(--blue);
+    --purple-deep: var(--dark);
+    --purple-light: var(--sky);
+    --purple-wash: #eef5ff;
+    --purple-edge: #c5d8f3;
+    --teal-wash: #e6f7f4;
+    --amber-wash: #fffbeb;
+    --crimson: #b22222;
+    --black: #0a0f2c;
+    --black-soft: #0f1f4b;
+
+    --serif: 'DM Serif Display', 'Georgia', serif;
+    --sans: 'Sora', system-ui, 'Helvetica Neue', sans-serif;
+    --mono: 'JetBrains Mono', 'IBM Plex Mono', monospace;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; scroll-padding-top: 80px; }
+
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--ink);
+    font-size: 13.5px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  .num { font-feature-settings: 'tnum', 'lnum'; }
+  .mono { font-family: var(--mono); }
+  .serif { font-family: var(--serif); }
+  .italic { font-style: italic; }
+
+  /* SCROLL PROGRESS BAR */
+  .scroll-progress {
+    position: fixed; top: 0; left: 0; height: 2px;
+    background: var(--purple); width: 0%;
+    z-index: 100; transition: width 0.1s ease;
+  }
+
+  /* ─────────────────── NAVIGATION ─────────────────── */
+  .topnav {
+    position: sticky; top: 0; z-index: 50;
+    background: rgba(250, 250, 247, 0.92);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-inner {
+    max-width: 1440px; margin: 0 auto;
+    padding: 16px 48px;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 32px;
+  }
+  .nav-brand {
+    display: flex; align-items: baseline; gap: 12px;
+  }
+  .nav-brand .marker {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--purple);
+    display: inline-block;
+    transform: translateY(-1px);
+    box-shadow: 0 0 0 4px var(--purple-wash);
+  }
+  .nav-brand .label {
+    font-family: var(--mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--ink);
+    font-weight: 500;
+  }
+  .nav-brand .sep {
+    font-family: var(--mono);
+    font-size: 11px; color: var(--faint);
+    letter-spacing: 0.14em;
+  }
+  .nav-brand .subtitle {
+    font-family: var(--mono);
+    font-size: 11px; color: var(--muted);
+    letter-spacing: 0.06em;
+  }
+  .nav-links {
+    display: flex; gap: 4px;
+  }
+  .nav-links a {
+    font-family: var(--mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    text-decoration: none;
+    padding: 8px 12px;
+    border-radius: 4px;
+    transition: all 0.15s;
+    position: relative;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .nav-q {
+    font-family: var(--mono);
+    font-size: 9px;
+    background: var(--purple);
+    color: white;
+    padding: 2px 5px;
+    border-radius: 2px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+  }
+  .nav-links a.active .nav-q { background: var(--purple-deep); }
+  .nav-links a:hover { color: var(--ink); background: var(--surface-tint); }
+  .nav-links a.active { color: var(--purple-deep); }
+  .nav-links a.active::after {
+    content: '';
+    position: absolute; bottom: 2px; left: 12px; right: 12px;
+    height: 1px; background: var(--purple);
+  }
+  .nav-actions {
+    display: flex; gap: 8px;
+  }
+  .nav-btn {
+    font-family: var(--mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--ink);
+    background: transparent;
+    border: 1px solid var(--border-strong);
+    padding: 8px 14px;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-weight: 500;
+  }
+  .nav-btn:hover { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+
+  /* ─────────────────── PAGE STRUCTURE ─────────────────── */
+  main { max-width: 1440px; margin: 0 auto; padding: 0 48px; }
+
+  section {
+    padding: 96px 0;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+  }
+  section:last-of-type { border-bottom: none; }
+
+  /* Section header — editorial style */
+  .section-header {
+    margin-bottom: 64px;
+    display: grid;
+    grid-template-columns: 80px 1fr auto;
+    gap: 32px;
+    align-items: baseline;
+    border-bottom: 1px solid var(--ink);
+    padding-bottom: 20px;
+  }
+  .section-num {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--purple);
+    letter-spacing: 0.15em;
+    font-weight: 600;
+  }
+  .section-title {
+    font-family: var(--serif);
+    font-size: 48px;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    font-weight: 400;
+  }
+  .section-title em {
+    font-style: italic;
+    color: var(--purple-deep);
+  }
+  .section-meta {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.06em;
+    text-align: right;
+  }
+
+  /* Section intro / dek */
+  .dek {
+    font-family: var(--serif);
+    font-size: 22px;
+    line-height: 1.45;
+    color: var(--ink-soft);
+    max-width: 760px;
+    margin-bottom: 48px;
+    letter-spacing: -0.005em;
+  }
+  .dek em { font-style: italic; color: var(--purple-deep); }
+
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: var(--purple);
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+
+  /* ─────────────────── HERO ─────────────────── */
+  #overview {
+    padding: 80px 0 96px 0;
+  }
+  .hero {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: end;
+    margin-bottom: 80px;
+  }
+  .hero-left .preamble {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--purple);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    margin-bottom: 24px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .hero-left .preamble::before {
+    content: ''; width: 24px; height: 1px; background: var(--purple);
+  }
+  .hero-title {
+    font-family: var(--serif);
+    font-size: 96px;
+    line-height: 0.92;
+    letter-spacing: -0.035em;
+    color: var(--ink);
+    font-weight: 400;
+    margin-bottom: 28px;
+  }
+  .hero-title em {
+    font-style: italic;
+    color: var(--purple-deep);
+  }
+  .hero-title .ttm {
+    font-size: 0.4em;
+    vertical-align: super;
+    color: var(--purple);
+  }
+  .hero-subtitle {
+    font-family: var(--serif);
+    font-size: 24px;
+    line-height: 1.4;
+    color: var(--muted);
+    max-width: 540px;
+    font-style: italic;
+  }
+  .hero-right {
+    display: flex; flex-direction: column;
+    gap: 18px;
+    border-left: 1px solid var(--border-strong);
+    padding-left: 40px;
+  }
+  .hero-right .meta-row {
+    display: flex; justify-content: space-between;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+  .hero-right .meta-row .val { color: var(--ink); font-weight: 500; }
+  .hero-narrative {
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.65;
+    color: var(--ink-soft);
+    margin-top: 20px;
+  }
+  .hero-narrative p + p { margin-top: 14px; }
+
+  /* KPI GRID — newsroom style */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    border-top: 1px solid var(--ink);
+    border-bottom: 1px solid var(--border);
+    margin-top: 64px;
+  }
+  .kpi {
+    padding: 36px 32px 32px;
+    border-right: 1px solid var(--border);
+    position: relative;
+    background: var(--surface);
+    transition: background 0.2s;
+  }
+  .kpi:nth-child(4n) { border-right: none; }
+  .kpi:nth-child(n+5) { border-top: 1px solid var(--border); }
+  .kpi:hover { background: var(--surface-tint); }
+  .kpi .marker {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--purple);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .kpi .num-val {
+    font-family: var(--serif);
+    font-size: 54px;
+    line-height: 1;
+    color: var(--ink);
+    letter-spacing: -0.025em;
+    margin-bottom: 6px;
+    font-feature-settings: 'tnum';
+    font-weight: 400;
+  }
+  .kpi .num-val em { font-style: italic; color: var(--purple-deep); }
+  .kpi .num-val .unit { font-size: 0.55em; color: var(--muted); margin-left: 4px; }
+  .kpi .label {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.4;
+    font-weight: 400;
+  }
+  .kpi .label strong { color: var(--ink); font-weight: 500; }
+  .kpi .footnote {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--faint);
+    letter-spacing: 0.06em;
+    margin-top: 12px;
+    text-transform: uppercase;
+  }
+
+  /* PHASE TIMELINE */
+  .phase-timeline {
+    margin-top: 80px;
+    background: var(--black);
+    color: var(--bg);
+    padding: 48px;
+    position: relative;
+    overflow: hidden;
+  }
+  .phase-timeline::before {
+    content: '';
+    position: absolute;
+    top: 0; right: 0;
+    width: 320px; height: 320px;
+    background: radial-gradient(circle, var(--purple-deep) 0%, transparent 65%);
+    opacity: 0.3;
+    transform: translate(40%, -30%);
+  }
+  .phase-timeline .pt-eyebrow {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--purple-light);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+  .phase-timeline h2 {
+    font-family: var(--serif);
+    font-size: 40px;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    margin-bottom: 12px;
+    font-weight: 400;
+  }
+  .phase-timeline h2 em { font-style: italic; color: var(--purple-light); }
+  .phase-timeline .pt-track {
+    margin-top: 40px;
+    display: grid;
+    grid-template-columns: 1fr 60px 1fr;
+    gap: 24px;
+    align-items: stretch;
+  }
+  .phase-card {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 28px;
+    position: relative;
+  }
+  .phase-card .phase-tag {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--purple-light);
+    margin-bottom: 12px;
+  }
+  .phase-card .phase-status {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    padding: 3px 8px;
+    border-radius: 2px;
+    margin-left: 8px;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+  .phase-card .ps-done {
+    background: var(--purple);
+    color: white;
+  }
+  .phase-card .ps-next {
+    background: rgba(192, 132, 252, 0.18);
+    color: var(--purple-light);
+    border: 1px solid var(--purple-light);
+  }
+  .phase-card h3 {
+    font-family: var(--serif);
+    font-size: 28px;
+    line-height: 1.15;
+    margin-bottom: 16px;
+    font-weight: 400;
+  }
+  .phase-card h3 em { font-style: italic; color: var(--purple-light); }
+  .phase-card p {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.75);
+    line-height: 1.6;
+  }
+  .phase-card ul {
+    margin-top: 16px;
+    list-style: none;
+  }
+  .phase-card ul li {
+    font-size: 13px;
+    padding-left: 16px;
+    position: relative;
+    margin-bottom: 8px;
+    color: rgba(255, 255, 255, 0.85);
+  }
+  .phase-card ul li::before {
+    content: '→';
+    position: absolute; left: 0;
+    color: var(--purple-light);
+    font-weight: bold;
+  }
+  .pt-arrow {
+    display: flex; align-items: center; justify-content: center;
+    color: var(--purple-light);
+    font-family: var(--mono);
+    letter-spacing: 0.1em;
+    font-size: 11px;
+    text-transform: uppercase;
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+  }
+
+  /* ─────────────────── EARNED MEDIA ─────────────────── */
+  .media-toolbar {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 32px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .filter-group {
+    display: flex; gap: 0;
+    border: 1px solid var(--border-strong);
+  }
+  .filter-btn {
+    font-family: var(--mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    background: transparent;
+    border: none;
+    border-right: 1px solid var(--border-strong);
+    padding: 10px 16px;
+    cursor: pointer;
+    color: var(--muted);
+    font-weight: 500;
+    transition: all 0.15s;
+  }
+  .filter-btn:last-child { border-right: none; }
+  .filter-btn.active { background: var(--ink); color: var(--bg); }
+  .filter-btn:hover:not(.active) { background: var(--surface-tint); color: var(--ink); }
+
+  .media-summary {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 0.04em;
+  }
+  .media-summary strong { color: var(--ink); font-weight: 500; }
+
+  .media-list {
+    border-top: 1px solid var(--ink);
+  }
+  .media-item {
+    display: grid;
+    grid-template-columns: 200px 1fr 140px 80px;
+    gap: 32px;
+    padding: 28px 0;
+    border-bottom: 1px solid var(--border);
+    align-items: start;
+    transition: background 0.15s;
+  }
+  .media-item:hover { background: var(--surface); }
+  .media-item.featured {
+    background: var(--black);
+    color: var(--bg);
+    padding: 32px 24px;
+    margin: 0 -24px;
+    border-bottom: 1px solid var(--border-strong);
+  }
+  .media-item.featured .article-title,
+  .media-item.featured .pub-name { color: var(--bg); }
+  .media-item.featured .article-meta,
+  .media-item.featured .article-link { color: rgba(255, 255, 255, 0.65); }
+  .media-item.featured .uvm-val { color: var(--purple-light); }
+  .media-item.featured .pub-tier { background: var(--purple); color: white; }
+
+  .pub-block .pub-name {
+    font-family: var(--serif);
+    font-size: 22px;
+    color: var(--ink);
+    letter-spacing: -0.01em;
+    margin-bottom: 8px;
+    font-weight: 400;
+  }
+  .pub-block .pub-tier {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    background: var(--purple-wash);
+    color: var(--purple-deep);
+    font-weight: 600;
+  }
+  .pub-block .pub-tier.tier-trade { background: var(--amber-wash); color: var(--amber); }
+  .pub-block .pub-tier.tier-insider { background: var(--teal-wash); color: var(--teal); }
+
+  .article-block .article-title {
+    font-size: 16px;
+    line-height: 1.45;
+    color: var(--ink);
+    font-weight: 500;
+    margin-bottom: 8px;
+    letter-spacing: -0.005em;
+  }
+  .media-item.featured .article-block .article-title { font-weight: 400; font-family: var(--serif); font-size: 24px; line-height: 1.3; }
+  .article-block .article-meta {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.02em;
+  }
+  .article-block .highlight {
+    color: var(--purple-deep);
+    font-weight: 600;
+  }
+  .media-item.featured .article-block .highlight { color: var(--purple-light); }
+  .article-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--purple);
+    text-decoration: none;
+    margin-top: 8px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    transition: color 0.15s;
+  }
+  .article-link:hover { color: var(--purple-deep); }
+  .article-link::after { content: '↗'; font-size: 12px; }
+
+  .uvm-block {
+    text-align: right;
+  }
+  .uvm-block .uvm-val {
+    font-family: var(--serif);
+    font-size: 36px;
+    color: var(--purple-deep);
+    line-height: 1;
+    letter-spacing: -0.02em;
+    font-weight: 400;
+  }
+  .uvm-block .uvm-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-top: 4px;
+  }
+
+  .sentiment-mark {
+    text-align: right;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  /* UVM definition tooltip */
+  .footnote-line {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 24px;
+    font-style: italic;
+    letter-spacing: 0.02em;
+  }
+
+  /* MEDIA STATS PANEL */
+  .media-aggregate {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    margin-top: 48px;
+    border: 1px solid var(--ink);
+    background: var(--surface);
+  }
+  .media-stat {
+    padding: 24px 28px;
+    border-right: 1px solid var(--border);
+  }
+  .media-stat:last-child { border-right: none; }
+  .media-stat .ms-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+  .media-stat .ms-num {
+    font-family: var(--serif);
+    font-size: 32px;
+    line-height: 1;
+    color: var(--ink);
+    letter-spacing: -0.02em;
+    font-weight: 400;
+  }
+  .media-stat .ms-sub {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 6px;
+  }
+
+  /* ─────────────────── PAID PERFORMANCE ─────────────────── */
+  .paid-summary {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 48px;
+    margin-bottom: 48px;
+  }
+  .breakout {
+    background: var(--surface-tint);
+    padding: 32px;
+    border-left: 2px solid var(--purple);
+  }
+  .breakout .eyebrow { color: var(--purple-deep); }
+  .breakout h3 {
+    font-family: var(--serif);
+    font-size: 32px;
+    line-height: 1.15;
+    letter-spacing: -0.015em;
+    margin-bottom: 16px;
+    font-weight: 400;
+  }
+  .breakout h3 em { font-style: italic; }
+  .breakout p {
+    font-size: 14px;
+    color: var(--ink-soft);
+    line-height: 1.6;
+  }
+  .breakout p + p { margin-top: 12px; }
+  .breakout strong { color: var(--purple-deep); font-weight: 600; }
+  .breakout.dark {
+    background: var(--black);
+    color: var(--bg);
+    border-left-color: var(--purple-light);
+  }
+  .breakout.dark h3 em { color: var(--purple-light); }
+  .breakout.dark p { color: rgba(255,255,255,0.78); }
+  .breakout.dark strong { color: var(--purple-light); }
+  .breakout.dark .eyebrow { color: var(--purple-light); }
+
+  /* Variant matrix table */
+  .matrix-wrapper {
+    overflow-x: auto;
+    margin-bottom: 48px;
+  }
+  table.matrix {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  table.matrix thead th {
+    text-align: left;
+    font-family: var(--mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    font-weight: 600;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--ink);
+  }
+  table.matrix thead th.num { text-align: right; }
+  table.matrix tbody td {
+    padding: 18px 16px;
+    border-bottom: 1px solid var(--border);
+    font-feature-settings: 'tnum';
+  }
+  table.matrix tbody td.num { text-align: right; font-family: var(--mono); }
+  table.matrix tbody tr.winner {
+    background: var(--purple-wash);
+  }
+  table.matrix tbody tr.winner td:first-child {
+    border-left: 2px solid var(--purple);
+    font-weight: 600;
+  }
+  table.matrix tbody tr.winner td.num { color: var(--purple-deep); font-weight: 600; }
+  .var-name {
+    font-weight: 500;
+  }
+  .var-name .lbl-sub {
+    display: block;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-top: 2px;
+    font-weight: 400;
+  }
+  .pill-winner {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    background: var(--purple);
+    color: white;
+    padding: 3px 8px;
+    margin-left: 8px;
+    font-weight: 600;
+  }
+
+  /* Chart container */
+  .chart-block {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 32px;
+    margin-bottom: 32px;
+  }
+  .chart-title {
+    font-family: var(--serif);
+    font-size: 22px;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+    margin-bottom: 4px;
+    font-weight: 400;
+  }
+  .chart-title em { font-style: italic; color: var(--purple-deep); }
+  .chart-subtitle {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 24px;
+  }
+  .chart-canvas { position: relative; height: 320px; }
+
+  /* PAIRED CHART — diverging comparison */
+  .paired-chart {
+    margin-top: 8px;
+  }
+  .pc-header {
+    display: grid;
+    grid-template-columns: 220px 1fr 1fr;
+    gap: 24px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border-strong);
+    margin-bottom: 16px;
+    font-family: var(--mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--muted);
+    font-weight: 600;
+  }
+  .pc-h-spend { text-align: right; }
+  .pc-h-imp { text-align: left; }
+  .pc-row {
+    display: grid;
+    grid-template-columns: 220px 1fr 1fr;
+    gap: 24px;
+    padding: 18px 0;
+    border-bottom: 1px solid var(--border);
+    align-items: center;
+  }
+  .pc-row:last-child { border-bottom: none; }
+  .pc-row.pc-winner {
+    background: linear-gradient(to right, var(--purple-wash), transparent);
+    padding-left: 12px;
+    margin-left: -12px;
+    border-left: 2px solid var(--purple);
+  }
+  .pc-label strong {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink);
+    display: block;
+    margin-bottom: 4px;
+  }
+  .pc-label .pc-tag {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    background: var(--purple);
+    color: white;
+    padding: 2px 7px;
+    font-weight: 600;
+    margin-right: 6px;
+  }
+  .pc-label .pc-tag-scale { background: var(--purple-deep); }
+  .pc-label .pc-sublabel {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 0.04em;
+    display: block;
+    margin-top: 4px;
+  }
+  .pc-spend-side {
+    display: flex; align-items: center; gap: 12px;
+    justify-content: flex-end;
+  }
+  .pc-imp-side {
+    display: flex; align-items: center; gap: 12px;
+  }
+  .pc-bar {
+    height: 10px;
+    background: var(--surface-tint);
+    border-radius: 1px;
+    overflow: hidden;
+    position: relative;
+  }
+  .pc-bar-spend { flex: 1; max-width: 100%; }
+  .pc-bar-imp { flex: 1; max-width: 100%; }
+  .pc-bar-spend .pc-fill {
+    height: 100%;
+    background: var(--purple-light);
+    margin-left: auto;
+    border-radius: 1px;
+  }
+  .pc-bar-imp .pc-fill {
+    height: 100%;
+    background: var(--purple-deep);
+    border-radius: 1px;
+  }
+  .pc-spend-side .pc-bar { transform: scaleX(-1); }
+  .pc-spend-side .pc-bar .pc-fill { transform: scaleX(-1); }
+  .pc-val {
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--ink);
+    min-width: 60px;
+  }
+  .pc-spend-side .pc-val { text-align: left; color: var(--muted); }
+  .pc-imp-side .pc-val { text-align: right; color: var(--purple-deep); }
+  .pc-winner .pc-imp-side .pc-val { font-weight: 700; }
+  .pc-footnote {
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.02em;
+    line-height: 1.5;
+  }
+
+  /* TABS */
+  .tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border-strong);
+    margin-bottom: 32px;
+  }
+  .tab-btn {
+    font-family: var(--mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    background: transparent;
+    border: none;
+    padding: 14px 24px;
+    cursor: pointer;
+    color: var(--muted);
+    font-weight: 500;
+    position: relative;
+    transition: color 0.15s;
+  }
+  .tab-btn:hover { color: var(--ink); }
+  .tab-btn.active { color: var(--purple-deep); }
+  .tab-btn.active::after {
+    content: '';
+    position: absolute; bottom: -1px; left: 0; right: 0;
+    height: 2px; background: var(--purple);
+  }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* DEMOGRAPHIC GRIDS */
+  .demo-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 32px;
+  }
+  .demo-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 24px;
+  }
+  .demo-panel h4 {
+    font-family: var(--mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--purple);
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+    font-weight: 600;
+  }
+
+  .bar-list { display: flex; flex-direction: column; gap: 10px; }
+  .bar-row {
+    display: grid;
+    grid-template-columns: 1fr 100px 50px;
+    gap: 12px;
+    align-items: center;
+    font-size: 12px;
+  }
+  .bar-row .bar-label { color: var(--ink); }
+  .bar-row .bar-label strong { font-weight: 500; }
+  .bar-track {
+    height: 4px;
+    background: var(--border);
+    border-radius: 1px;
+    overflow: hidden;
+  }
+  .bar-fill {
+    height: 100%;
+    background: var(--purple);
+    border-radius: 1px;
+  }
+  .bar-fill.alt { background: var(--purple-deep); }
+  .bar-row .bar-val {
+    text-align: right;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--ink);
+    font-weight: 500;
+  }
+
+  /* COMPANY LIST */
+  .company-list { font-size: 13px; }
+  .company-row {
+    display: flex; justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px dashed var(--border);
+  }
+  .company-row:last-child { border-bottom: none; }
+  .company-row .co-name { color: var(--ink); }
+  .company-row .co-name.strong { font-weight: 500; }
+  .company-row .co-imp {
+    font-family: var(--mono);
+    color: var(--purple-deep);
+    font-size: 12px;
+  }
+
+  /* ─────────────────── EMAIL & ORGANIC ─────────────────── */
+  .channel-grid {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 48px;
+    margin-bottom: 48px;
+  }
+  .channel-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 36px;
+    position: relative;
+  }
+  .channel-card.dark {
+    background: var(--black);
+    color: var(--bg);
+    border-color: var(--black);
+  }
+  .channel-card .ch-eyebrow {
+    font-family: var(--mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--purple);
+    margin-bottom: 12px;
+    font-weight: 600;
+  }
+  .channel-card.dark .ch-eyebrow { color: var(--purple-light); }
+  .channel-card h3 {
+    font-family: var(--serif);
+    font-size: 32px;
+    line-height: 1.1;
+    letter-spacing: -0.015em;
+    margin-bottom: 24px;
+    font-weight: 400;
+  }
+  .channel-card h3 em { font-style: italic; color: var(--purple-deep); }
+  .channel-card.dark h3 em { color: var(--purple-light); }
+  .channel-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    margin-bottom: 28px;
+    padding-bottom: 28px;
+    border-bottom: 1px solid var(--border);
+  }
+  .channel-card.dark .channel-stats { border-bottom-color: rgba(255,255,255,0.1); }
+  .ch-stat .ch-num {
+    font-family: var(--serif);
+    font-size: 32px;
+    line-height: 1;
+    color: var(--purple-deep);
+    font-feature-settings: 'tnum';
+    letter-spacing: -0.02em;
+    margin-bottom: 4px;
+    font-weight: 400;
+  }
+  .channel-card.dark .ch-num { color: var(--purple-light); }
+  .ch-stat .ch-lbl {
+    font-family: var(--mono);
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+  }
+  .channel-card.dark .ch-lbl { color: rgba(255,255,255,0.6); }
+  .channel-card .desc {
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--ink-soft);
+  }
+  .channel-card.dark .desc { color: rgba(255,255,255,0.78); }
+  .link-list {
+    margin-top: 20px;
+  }
+  .link-row {
+    display: flex; justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    align-items: baseline;
+    font-size: 13px;
+  }
+  .channel-card.dark .link-row { border-bottom-color: rgba(255,255,255,0.08); }
+  .link-row:last-child { border-bottom: none; }
+  .link-row .link-name { color: var(--ink); flex: 1; }
+  .channel-card.dark .link-name { color: rgba(255,255,255,0.85); }
+  .link-row .link-meta {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--purple-deep);
+    margin-left: 16px;
+  }
+  .channel-card.dark .link-meta { color: var(--purple-light); }
+  .pull-quote {
+    margin-top: 32px;
+    padding: 20px;
+    background: var(--surface-tint);
+    border-left: 2px solid var(--purple);
+    font-family: var(--serif);
+    font-size: 17px;
+    font-style: italic;
+    line-height: 1.45;
+    color: var(--ink-soft);
+  }
+  .channel-card.dark .pull-quote { background: rgba(255,255,255,0.03); color: rgba(255,255,255,0.9); }
+
+  /* ─────────────────── AUDIENCE & TRAFFIC ─────────────────── */
+  .traffic-grid {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 48px;
+    margin-bottom: 48px;
+  }
+  .traffic-block {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 32px;
+  }
+  .traffic-block h3 {
+    font-family: var(--mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--purple);
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+    font-weight: 600;
+  }
+  .device-row { display: flex; gap: 24px; align-items: center; margin-top: 24px; }
+  .device-bar {
+    flex: 1; height: 16px;
+    background: var(--border);
+    border-radius: 2px; overflow: hidden;
+    display: flex;
+  }
+  .device-bar .dev-fill {
+    height: 100%;
+  }
+  .device-bar .dev-desktop { background: var(--purple-deep); }
+  .device-bar .dev-mobile { background: var(--purple); }
+  .device-bar .dev-tablet { background: var(--purple-light); }
+  .device-legend { display: flex; gap: 16px; font-size: 12px; }
+  .device-legend .dl-item { display: flex; align-items: center; gap: 6px; }
+  .device-legend .dot { width: 8px; height: 8px; border-radius: 50%; }
+
+  /* Geographic block */
+  .geo-block {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 32px;
+  }
+
+  /* ─────────────────── PIPELINE & ATTRIBUTION ─────────────────── */
+  .pipeline-summary {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    margin-bottom: 48px;
+    border-top: 1px solid var(--ink);
+    border-bottom: 1px solid var(--border);
+  }
+  .pipe-stat {
+    padding: 32px 28px;
+    border-right: 1px solid var(--border);
+    background: var(--surface);
+  }
+  .pipe-stat:last-child { border-right: none; }
+  .pipe-stat.feat { background: var(--black); color: var(--bg); }
+  .pipe-stat .pipe-num {
+    font-family: var(--serif);
+    font-size: 58px;
+    line-height: 1;
+    color: var(--ink);
+    letter-spacing: -0.025em;
+    margin-bottom: 8px;
+    font-weight: 400;
+  }
+  .pipe-stat.feat .pipe-num { color: var(--purple-light); }
+  .pipe-stat .pipe-lbl {
+    font-family: var(--mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    line-height: 1.4;
+  }
+  .pipe-stat.feat .pipe-lbl { color: rgba(255,255,255,0.7); }
+
+  /* Confirmed leads cards */
+  .leads-section { margin-bottom: 64px; }
+  .leads-cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+  .lead-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 24px;
+    border-left: 2px solid var(--purple);
+  }
+  .lead-card.feat {
+    background: var(--purple-wash);
+    border-left-color: var(--purple-deep);
+  }
+  .lead-card .lead-name {
+    font-family: var(--serif);
+    font-size: 22px;
+    color: var(--ink);
+    letter-spacing: -0.01em;
+    margin-bottom: 4px;
+    font-weight: 400;
+  }
+  .lead-card .lead-co {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.04em;
+    margin-bottom: 14px;
+  }
+  .lead-card .pills {
+    display: flex; gap: 6px; flex-wrap: wrap;
+    margin-bottom: 14px;
+  }
+  .pill {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    padding: 3px 8px;
+    font-weight: 600;
+  }
+  .pill-purple { background: var(--purple-wash); color: var(--purple-deep); }
+  .pill-dark { background: var(--black); color: white; }
+  .pill-muted { background: var(--surface-tint); color: var(--ink-soft); }
+  .pill-amber { background: var(--amber-wash); color: var(--amber); }
+  .pill-teal { background: var(--teal-wash); color: var(--teal); }
+  .lead-card .lead-detail {
+    font-size: 13px;
+    line-height: 1.55;
+    color: var(--ink-soft);
+  }
+  .lead-card .lead-detail strong {
+    color: var(--purple-deep);
+    font-weight: 500;
+  }
+  .lead-channel {
+    font-family: var(--mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--purple);
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px dashed var(--border);
+    display: flex; justify-content: space-between;
+  }
+
+  /* Attribution table */
+  .attribution-section { margin-top: 64px; }
+  .attribution-header {
+    display: flex; justify-content: space-between; align-items: end;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--ink);
+  }
+  .attribution-header h3 {
+    font-family: var(--serif);
+    font-size: 28px;
+    line-height: 1.15;
+    letter-spacing: -0.015em;
+    color: var(--ink);
+    font-weight: 400;
+  }
+  .attribution-header h3 em { font-style: italic; color: var(--purple-deep); }
+  .attribution-header .att-meta {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  table.attribution {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  table.attribution thead th {
+    text-align: left;
+    font-family: var(--mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    font-weight: 600;
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--ink);
+    cursor: pointer;
+    user-select: none;
+    background: var(--surface);
+  }
+  table.attribution thead th:hover { color: var(--ink); }
+  table.attribution thead th .sort-ind {
+    color: var(--purple);
+    margin-left: 4px;
+    font-size: 10px;
+  }
+  table.attribution tbody td {
+    padding: 14px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  table.attribution tbody tr:hover { background: var(--surface); }
+  table.attribution tbody tr.tier-divider td {
+    background: var(--purple-wash);
+    font-family: var(--mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--purple-deep);
+    padding: 8px 14px;
+    font-weight: 600;
+    border-bottom: 1px solid var(--purple-edge);
+  }
+  .lead-name-cell {
+    font-weight: 500;
+    color: var(--ink);
+  }
+  .lead-name-cell .lead-co-inline {
+    display: block;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted);
+    margin-top: 3px;
+    font-weight: 400;
+    letter-spacing: 0.04em;
+  }
+  .conf-badge {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    padding: 3px 8px;
+    font-weight: 600;
+  }
+  .conf-direct { background: var(--purple); color: white; }
+  .conf-high { background: var(--purple-deep); color: white; }
+  .conf-possible { background: var(--purple-light); color: var(--purple-deep); }
+  .signal-text {
+    font-size: 12px;
+    color: var(--ink-soft);
+    line-height: 1.5;
+  }
+  .signal-text strong { color: var(--purple-deep); font-weight: 600; }
+
+  /* ─────────────────── RECOMMENDATIONS ─────────────────── */
+  .recs-intro {
+    background: var(--black);
+    color: var(--bg);
+    padding: 64px 48px;
+    margin-bottom: 48px;
+    position: relative;
+    overflow: hidden;
+  }
+  .recs-intro::before {
+    content: '';
+    position: absolute;
+    bottom: -60px; left: -60px;
+    width: 240px; height: 240px;
+    background: radial-gradient(circle, var(--purple) 0%, transparent 60%);
+    opacity: 0.4;
+  }
+  .recs-intro .eyebrow { color: var(--purple-light); }
+  .recs-intro h2 {
+    font-family: var(--serif);
+    font-size: 48px;
+    line-height: 1.1;
+    letter-spacing: -0.025em;
+    margin-bottom: 16px;
+    font-weight: 400;
+    position: relative;
+  }
+  .recs-intro h2 em { font-style: italic; color: var(--purple-light); }
+  .recs-intro p {
+    font-family: var(--serif);
+    font-size: 22px;
+    line-height: 1.5;
+    color: rgba(255, 255, 255, 0.78);
+    max-width: 720px;
+    font-style: italic;
+    position: relative;
+  }
+
+  .rec-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 32px;
+  }
+  .rec-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 32px;
+    position: relative;
+    transition: all 0.2s;
+  }
+  .rec-card:hover {
+    border-color: var(--purple);
+    box-shadow: 0 8px 24px rgba(139, 47, 229, 0.06);
+  }
+  .rec-card .rec-num {
+    font-family: var(--serif);
+    font-size: 64px;
+    line-height: 0.9;
+    color: var(--purple);
+    letter-spacing: -0.04em;
+    margin-bottom: 16px;
+    font-style: italic;
+    font-weight: 400;
+  }
+  .rec-card h3 {
+    font-family: var(--serif);
+    font-size: 24px;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+    margin-bottom: 14px;
+    font-weight: 400;
+  }
+  .rec-card p {
+    font-size: 14px;
+    line-height: 1.65;
+    color: var(--ink-soft);
+  }
+  .rec-card p strong { color: var(--purple-deep); font-weight: 600; }
+  .rec-card.feat {
+    grid-column: span 2;
+    background: var(--purple-wash);
+    border-color: var(--purple-edge);
+  }
+  .rec-card.feat .rec-num { color: var(--purple-deep); }
+  .rec-card.feat h3 { font-size: 28px; }
+
+  /* ─────────────────── FOOTER ─────────────────── */
+  footer {
+    background: var(--black);
+    color: var(--bg);
+    padding: 64px 48px 32px;
+    margin-top: 0;
+  }
+  .footer-inner { max-width: 1440px; margin: 0 auto; }
+  .footer-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 48px;
+    margin-bottom: 48px;
+  }
+  .footer-grid h4 {
+    font-family: var(--mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--purple-light);
+    margin-bottom: 16px;
+    font-weight: 600;
+  }
+  .footer-grid p, .footer-grid li {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.65);
+    line-height: 1.7;
+  }
+  .footer-grid ul { list-style: none; }
+  .footer-title {
+    font-family: var(--serif);
+    font-size: 32px;
+    line-height: 1.15;
+    color: white;
+    margin-bottom: 12px;
+    letter-spacing: -0.015em;
+    font-weight: 400;
+  }
+  .footer-title em { font-style: italic; color: var(--purple-light); }
+  .footer-bottom {
+    border-top: 1px solid rgba(255,255,255,0.08);
+    padding-top: 24px;
+    display: flex; justify-content: space-between;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: rgba(255, 255, 255, 0.4);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  /* BACK TO TOP */
+  .back-to-top {
+    position: fixed;
+    bottom: 32px; right: 32px;
+    width: 48px; height: 48px;
+    background: var(--ink);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    opacity: 0;
+    transition: all 0.2s;
+    z-index: 40;
+    font-size: 18px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .back-to-top.visible { opacity: 0.9; }
+  .back-to-top:hover { opacity: 1; transform: translateY(-2px); }
+
+  /* PRINT STYLES */
+  @media print {
+    .topnav, .back-to-top, .scroll-progress, .filter-group, .nav-actions { display: none !important; }
+    main { padding: 0; max-width: 100%; }
+    section { padding: 24px 0; page-break-inside: avoid; }
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 1100px) {
+    .nav-links { display: none; }
+    .hero { grid-template-columns: 1fr; gap: 48px; }
+    .hero-title { font-size: 64px; }
+    .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+    .kpi:nth-child(2n) { border-right: none; }
+    .kpi:nth-child(n+3) { border-top: 1px solid var(--border); }
+    .paid-summary, .channel-grid, .traffic-grid { grid-template-columns: 1fr; }
+    .pipeline-summary, .demo-grid { grid-template-columns: repeat(2, 1fr); }
+    .leads-cards { grid-template-columns: 1fr; }
+    .rec-grid { grid-template-columns: 1fr; }
+    .rec-card.feat { grid-column: span 1; }
+    main { padding: 0 24px; }
+    .nav-inner { padding: 16px 24px; }
+    .media-item { grid-template-columns: 1fr; gap: 12px; padding: 24px 0; }
+    .uvm-block { text-align: left; }
+    .section-title { font-size: 36px; }
+    .section-header { grid-template-columns: 60px 1fr; }
+    .section-meta { display: none; }
+  }
+
+  /* ═══════════════════════════════════════════════════════════════ */
+  /*   OPTION C · MAGAZINE EDITORIAL · NAVY/BLUE DASHBOARD STYLE     */
+  /*   Inherits palette and typography from Vantor Lead Intelligence */
+  /* ═══════════════════════════════════════════════════════════════ */
+
+  body { padding-left: 220px; }
+
+  /* ─────────────── SIDE RAIL NAV ─────────────── */
+  .side-rail {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 220px;
+    background: linear-gradient(180deg, var(--navy) 0%, var(--dark) 100%);
+    color: #fff;
+    padding: 32px 22px;
+    overflow-y: auto;
+    z-index: 60;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 2px 0 12px rgba(10,15,44,0.08);
+  }
+  .side-rail .rail-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 6px;
+  }
+  .side-rail .rail-brand .marker {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--sky);
+    box-shadow: 0 0 0 4px rgba(78,154,241,0.15);
+  }
+  .side-rail .rail-brand .label {
+    font-family: var(--sans);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: #fff;
+    font-weight: 700;
+  }
+  .side-rail .rail-tagline {
+    font-size: 10px;
+    color: var(--light-blue);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 32px;
+    padding-left: 18px;
+    font-weight: 600;
+  }
+  .side-rail .rail-section {
+    font-family: var(--mono);
+    font-size: 9.5px;
+    color: rgba(168, 207, 248, 0.55);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    margin: 22px 0 10px;
+    font-weight: 600;
+  }
+  .side-rail .rail-section:first-of-type { margin-top: 0; }
+  .side-rail nav { display: flex; flex-direction: column; gap: 2px; }
+  .side-rail nav a {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    padding: 9px 12px;
+    border-radius: 6px;
+    text-decoration: none;
+    color: rgba(255,255,255,0.7);
+    font-size: 12.5px;
+    line-height: 1.3;
+    transition: all 0.15s ease;
+    font-weight: 500;
+  }
+  .side-rail nav a:hover { background: rgba(255,255,255,0.06); color: #fff; }
+  .side-rail nav a.active {
+    background: rgba(78,154,241,0.16);
+    color: #fff;
+    font-weight: 600;
+  }
+  .side-rail nav a.active::before {
+    content: "";
+    width: 3px; height: 16px;
+    background: var(--sky);
+    border-radius: 2px;
+    margin-left: -12px;
+    margin-right: 9px;
+  }
+  .side-rail nav a .rail-q {
+    font-family: var(--mono);
+    font-size: 9.5px;
+    color: var(--light-blue);
+    letter-spacing: 0.12em;
+    font-weight: 600;
+    min-width: 18px;
+  }
+  .side-rail .rail-footer {
+    margin-top: auto;
+    padding-top: 18px;
+    border-top: 1px solid rgba(255,255,255,0.08);
+    font-size: 10.5px;
+    color: rgba(168, 207, 248, 0.55);
+    line-height: 1.6;
+  }
+
+  /* Hide original top nav */
+  .topnav { display: none !important; }
+  html { scroll-padding-top: 24px; }
+
+  /* ─────────────── MAIN LAYOUT ─────────────── */
+  main { max-width: none; padding: 0; margin: 0; }
+  .scroll-progress { left: 220px; }
+
+  /* ─────────────── HERO: dark gradient header ─────────────── */
+  #overview { padding: 0 !important; }
+  .hero {
+    background: linear-gradient(135deg, var(--navy) 0%, var(--dark) 50%, #1a3a7a 100%);
+    color: #fff;
+    padding: 44px 48px 36px !important;
+    margin: 0 !important;
+    border-bottom: 0 !important;
+    display: grid !important;
+    grid-template-columns: 1.4fr 1fr !important;
+    gap: 48px !important;
+    align-items: start !important;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-left {
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: flex-start !important;
+    padding-top: 4px !important;
+  }
+  .hero-right {
+    border-left: none !important;
+    padding-left: 0 !important;
+    margin-top: 0 !important;
+  }
+  .hero::before {
+    content: "";
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 400px; height: 400px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(78,154,241,0.15) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero::after {
+    content: "";
+    position: absolute;
+    bottom: -80px; left: 25%;
+    width: 500px; height: 300px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(30,215,96,0.05) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-left, .hero-right { position: relative; z-index: 1; }
+  .hero-left .preamble {
+    font-size: 10px !important;
+    color: var(--light-blue) !important;
+    letter-spacing: 0.3em !important;
+    text-transform: uppercase !important;
+    font-weight: 600 !important;
+    margin-bottom: 14px !important;
+    padding-left: 0 !important;
+  }
+  .hero-left .preamble::before { display: none !important; }
+  .hero-title {
+    font-family: var(--serif) !important;
+    font-size: 38px !important;
+    font-weight: 400 !important;
+    line-height: 1.15 !important;
+    color: #fff !important;
+    letter-spacing: -0.005em !important;
+  }
+  .hero-title em {
+    font-style: italic !important;
+    color: var(--sky) !important;
+  }
+  .hero-title .ttm {
+    font-size: 0.4em !important;
+    color: var(--light-blue) !important;
+    vertical-align: super !important;
+  }
+  .hero-right .meta-row {
+    padding: 6px 0 !important;
+    font-size: 11.5px !important;
+    color: #8aadd4 !important;
+    border-bottom: 1px solid rgba(255,255,255,0.08) !important;
+    display: flex !important;
+    justify-content: space-between !important;
+  }
+  .hero-right .meta-row .val { color: #fff !important; font-weight: 500 !important; }
+  .hero-narrative {
+    margin-top: 18px !important;
+    padding-top: 16px !important;
+    border-top: 1px solid rgba(255,255,255,0.1) !important;
+    font-size: 12px !important;
+    line-height: 1.65 !important;
+    color: #b4cce8 !important;
+  }
+  .hero-narrative strong { color: #fff !important; font-weight: 600 !important; }
+  .hero-narrative p + p { margin-top: 10px !important; }
+
+  /* ─────────────── KPI ROW: dark-gradient styled ─────────────── */
+  .kpi-grid {
+    background: linear-gradient(135deg, var(--navy) 0%, var(--dark) 100%);
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 14px !important;
+    margin: 0 !important;
+    padding: 28px 48px 32px !important;
+    border-top: 1px solid rgba(255,255,255,0.05);
+  }
+  .kpi {
+    background: rgba(255,255,255,0.07) !important;
+    border: 1px solid rgba(255,255,255,0.11) !important;
+    border-radius: 10px !important;
+    padding: 16px 20px !important;
+    box-shadow: none !important;
+    transition: background 0.2s !important;
+  }
+  .kpi:hover { background: rgba(255,255,255,0.1) !important; }
+  .kpi .marker {
+    font-family: var(--mono) !important;
+    font-size: 9px !important;
+    letter-spacing: 0.15em !important;
+    color: rgba(168,207,248,0.7) !important;
+    text-transform: uppercase;
+    margin-bottom: 10px !important;
+    display: flex !important;
+    justify-content: space-between !important;
+  }
+  .kpi .num-val {
+    font-family: var(--serif) !important;
+    font-size: 30px !important;
+    font-weight: 400 !important;
+    color: var(--sky) !important;
+    line-height: 1 !important;
+    margin-bottom: 8px !important;
+    letter-spacing: -0.01em !important;
+  }
+  .kpi .num-val em { font-style: italic !important; color: var(--sky) !important; }
+  .kpi .num-val .unit { color: var(--light-blue) !important; font-size: 0.55em !important; }
+  .kpi .label {
+    font-size: 10.5px !important;
+    line-height: 1.5 !important;
+    color: #b4cce8 !important;
+  }
+  .kpi .label strong { color: #fff !important; font-weight: 600 !important; }
+
+  /* Differentiated KPI accent colors — second card green, fourth red, sixth amber */
+  .kpi:nth-child(2) .num-val { color: #5dde85 !important; }
+  .kpi:nth-child(3) .num-val { color: #5dde85 !important; }
+  .kpi:nth-child(5) .num-val { color: #ffc857 !important; }
+  .kpi:nth-child(6) .num-val { color: #ffc857 !important; }
+  .kpi:nth-child(7) .num-val { color: #ff9070 !important; }
+  .kpi:nth-child(8) .num-val { color: #5dde85 !important; }
+
+  /* ─────────────── CONTENT WRAPPER FOR CARDS ─────────────── */
+  section { padding: 0 !important; border-bottom: none !important; margin: 0 !important; }
+  section[id]:not(#overview) {
+    padding: 24px 24px 0 !important;
+  }
+  section[id]:last-of-type { padding-bottom: 24px !important; }
+
+  /* Section header: navy card-like header instead of giant magazine title */
+  .section-header {
+    background: var(--surface) !important;
+    border-radius: 14px 14px 0 0 !important;
+    box-shadow: 0 1px 3px rgba(10,15,44,0.06) !important;
+    border-bottom: 1px solid var(--border) !important;
+    padding: 24px 32px 20px !important;
+    margin: 0 !important;
+    display: grid !important;
+    grid-template-columns: auto 1fr auto !important;
+    gap: 16px !important;
+    align-items: center !important;
+  }
+  .section-num {
+    background: var(--navy) !important;
+    color: #fff !important;
+    font-family: var(--sans) !important;
+    font-size: 9.5px !important;
+    font-weight: 700 !important;
+    padding: 5px 12px !important;
+    border-radius: 20px !important;
+    letter-spacing: 0.15em !important;
+    text-transform: uppercase !important;
+    width: auto !important;
+  }
+  .section-title {
+    font-family: var(--serif) !important;
+    font-size: 22px !important;
+    line-height: 1.3 !important;
+    font-weight: 400 !important;
+    color: var(--navy) !important;
+    letter-spacing: -0.005em !important;
+  }
+  .section-title em {
+    font-style: italic !important;
+    color: var(--blue) !important;
+  }
+  .section-meta {
+    font-family: var(--mono) !important;
+    font-size: 10px !important;
+    color: var(--muted) !important;
+    letter-spacing: 0.1em !important;
+    text-align: right !important;
+  }
+
+  /* Section content wrapped to look like a card body */
+  .section-body {
+    background: var(--surface);
+    padding: 24px 32px 32px;
+    box-shadow: 0 1px 3px rgba(10,15,44,0.06);
+    border-radius: 0 0 14px 14px;
+  }
+  .section-body > .dek:first-child { margin-top: 0; }
+
+  /* ─────────────── DEK: blue accent left-border ─────────────── */
+  .dek {
+    background: #eef5ff !important;
+    border-left: 4px solid var(--blue) !important;
+    border-radius: 0 8px 8px 0 !important;
+    padding: 16px 20px !important;
+    font-family: var(--sans) !important;
+    font-size: 13.5px !important;
+    line-height: 1.7 !important;
+    color: #2c4a7a !important;
+    margin: 0 0 24px !important;
+    max-width: none !important;
+    letter-spacing: 0 !important;
+  }
+  .dek em { font-style: italic !important; color: var(--dark) !important; }
+
+  /* ─────────────── TYPOGRAPHY INSIDE CARDS ─────────────── */
+  h3, h4 { font-family: var(--sans); font-weight: 700; color: var(--navy); }
+  h3 { font-size: 14px; letter-spacing: 0.02em; }
+  h4 { font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+
+  /* Override stylized italic h3 used inside paid/email/audience sections */
+  section h3 em {
+    font-style: italic !important;
+    color: var(--blue) !important;
+    font-weight: 700 !important;
+  }
+
+  /* Tables */
+  section table { font-size: 12.5px; }
+  section th {
+    background: #f7f9fd;
+    color: var(--navy);
+    font-weight: 700;
+    text-align: left;
+    padding: 10px 14px;
+    border-bottom: 2px solid var(--border);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  section td {
+    padding: 9px 14px;
+    border-bottom: 1px solid #f0f3fa;
+    color: #334;
+  }
+  section tr:hover td { background: #f9fbff; }
+
+  /* Links in body */
+  section a { color: var(--blue); }
+  section a:hover { color: var(--dark); }
+
+  /* Highlight callouts */
+  .highlight {
+    background: #eef5ff;
+    border-left: 3px solid var(--blue);
+    padding: 11px 15px;
+    border-radius: 0 8px 8px 0;
+    margin: 12px 0;
+    font-size: 12.5px;
+    color: #2c4a7a;
+    line-height: 1.65;
+  }
+
+  /* Recommendation cards: dark gradient block, matching .recs in reference */
+  .rec-card, .rec-section {
+    background: linear-gradient(135deg, var(--navy) 0%, var(--dark) 100%) !important;
+    color: #fff !important;
+    border: none !important;
+    border-radius: 14px !important;
+    box-shadow: none !important;
+  }
+  .rec-card h3, .rec-section h3 {
+    color: var(--light-blue) !important;
+    font-family: var(--serif) !important;
+    font-weight: 400 !important;
+  }
+  .rec-card p, .rec-section p { color: #8aaccc !important; }
+  .rec-card strong, .rec-section strong { color: #fff !important; }
+
+  /* Bar fills inside section: tint to blue */
+  .bar-fill { background: var(--blue) !important; }
+  .bar-track { background: var(--surface-tint) !important; }
+
+  /* Footer: keep dark navy */
+  footer {
+    background: var(--navy) !important;
+    color: #fff !important;
+  }
+  footer .footer-title, footer h4, footer a { color: #fff !important; }
+  footer a { color: rgba(168,207,248,0.7) !important; }
+
+  /* Back-to-top button: blue */
+  .back-to-top {
+    background: var(--blue) !important;
+    color: #fff !important;
+    border: none !important;
+  }
+
+  /* Scroll progress: blue */
+  .scroll-progress { background: var(--blue) !important; }
+
+  /* Filter buttons (used in earned media section): match reference tab style */
+  .filter-btn {
+    background: transparent !important;
+    border: none !important;
+    border-bottom: 3px solid transparent !important;
+    color: var(--muted) !important;
+    font-family: var(--sans) !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    padding: 12px 14px !important;
+    border-radius: 0 !important;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .filter-btn:hover { color: var(--blue) !important; }
+  .filter-btn.active {
+    color: var(--blue) !important;
+    border-bottom-color: var(--blue) !important;
+  }
+
+  /* Media list items: lighter card look, navy accent */
+  .media-item {
+    background: var(--surface) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 10px !important;
+    padding: 16px 20px !important;
+    margin-bottom: 10px !important;
+    box-shadow: 0 1px 2px rgba(10,15,44,0.03) !important;
+    transition: all 0.15s ease !important;
+  }
+  .media-item:hover {
+    border-color: var(--sky) !important;
+    box-shadow: 0 2px 8px rgba(10,15,44,0.08) !important;
+  }
+  .media-item.featured {
+    background: linear-gradient(135deg, #f0f6ff 0%, #e3f0ff 100%) !important;
+    border: 1px solid var(--sky) !important;
+  }
+  .pub-name { color: var(--navy) !important; font-weight: 700 !important; }
+  .uvm-val { color: var(--blue) !important; font-family: var(--serif) !important; }
+  .pub-tier {
+    background: #eef5ff !important;
+    color: #1a4db0 !important;
+    font-size: 10px !important;
+    padding: 2px 8px !important;
+    border-radius: 10px !important;
+    font-weight: 700 !important;
+  }
+  .pub-tier.tier-trade {
+    background: var(--green-wash) !important;
+    color: var(--green-deep) !important;
+  }
+  .pub-tier.tier-insider {
+    background: #f5f0ff !important;
+    color: #5a2d8a !important;
+  }
+  .article-link {
+    color: var(--blue) !important;
+    font-size: 11.5px !important;
+    font-weight: 600 !important;
+  }
+
+  /* Tabs (paid section variants etc.) */
+  .tab-btn {
+    background: transparent !important;
+    border: none !important;
+    border-bottom: 3px solid transparent !important;
+    color: var(--muted) !important;
+    font-weight: 600 !important;
+    padding: 10px 14px !important;
+    font-size: 12px !important;
+    cursor: pointer;
+  }
+  .tab-btn.active { color: var(--blue) !important; border-bottom-color: var(--blue) !important; }
+
+  /* Lead cards (pipeline section): match reference card aesthetic */
+  .lead-card {
+    background: var(--surface) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 10px !important;
+    box-shadow: 0 1px 2px rgba(10,15,44,0.03) !important;
+  }
+
+  /* Make sure all original purple uses become blue */
+  [style*="color:var(--purple)"], [style*="color: var(--purple)"] { color: var(--blue) !important; }
+  [style*="color:var(--purple-deep)"], [style*="color: var(--purple-deep)"] { color: var(--dark) !important; }
+
+  /* ─────────────── BULLETPROOF TEXT CONTRAST ON DARK SURFACES ─────────────── */
+  /* Anything inside the hero or KPI band must be light, regardless of inline styles
+     or inherited dark color variables from the original cream-theme CSS.        */
+  .hero, .hero * { color: #cfe0f5; }
+  .hero-title, .hero-title em, .hero-title .ttm { color: #fff !important; }
+  .hero-title em { color: var(--sky) !important; }
+  .hero-title .ttm { color: var(--light-blue) !important; }
+  .hero-right .meta-row span:first-child { color: #8aadd4 !important; }
+  .hero-right .meta-row .val { color: #fff !important; }
+  .hero strong { color: #fff !important; }
+
+  .kpi-grid .kpi,
+  .kpi-grid .kpi * { color: #cfe0f5; }
+  .kpi-grid .kpi .num-val,
+  .kpi-grid .kpi .num-val em,
+  .kpi-grid .kpi .num-val span { color: var(--sky) !important; }
+  .kpi-grid .kpi:nth-child(2) .num-val,
+  .kpi-grid .kpi:nth-child(2) .num-val em,
+  .kpi-grid .kpi:nth-child(2) .num-val span { color: #5dde85 !important; }
+  .kpi-grid .kpi:nth-child(3) .num-val,
+  .kpi-grid .kpi:nth-child(3) .num-val em,
+  .kpi-grid .kpi:nth-child(3) .num-val span { color: #5dde85 !important; }
+  .kpi-grid .kpi:nth-child(5) .num-val,
+  .kpi-grid .kpi:nth-child(5) .num-val em,
+  .kpi-grid .kpi:nth-child(5) .num-val span { color: #ffc857 !important; }
+  .kpi-grid .kpi:nth-child(6) .num-val,
+  .kpi-grid .kpi:nth-child(6) .num-val em,
+  .kpi-grid .kpi:nth-child(6) .num-val span { color: #ffc857 !important; }
+  .kpi-grid .kpi:nth-child(7) .num-val,
+  .kpi-grid .kpi:nth-child(7) .num-val em,
+  .kpi-grid .kpi:nth-child(7) .num-val span { color: #ff9070 !important; }
+  .kpi-grid .kpi:nth-child(8) .num-val,
+  .kpi-grid .kpi:nth-child(8) .num-val em,
+  .kpi-grid .kpi:nth-child(8) .num-val span { color: #5dde85 !important; }
+  .kpi-grid .kpi .label { color: #b4cce8 !important; }
+  .kpi-grid .kpi .label strong { color: #fff !important; }
+  .kpi-grid .kpi .marker {
+    color: rgba(168,207,248,0.7) !important;
+    justify-content: flex-start !important;
+  }
+
+  /* Side rail: also keep all text light */
+  .side-rail, .side-rail * { color: inherit; }
+  .side-rail nav a { color: rgba(255,255,255,0.7) !important; }
+  .side-rail nav a:hover { color: #fff !important; }
+  .side-rail nav a.active { color: #fff !important; }
+
+  /* Footer */
+  footer, footer * { color: rgba(255,255,255,0.7); }
+  footer h4 { color: var(--sky) !important; }
+  footer .footer-title { color: #fff !important; }
+  footer .footer-title em { color: var(--sky) !important; }
+  footer a { color: rgba(168,207,248,0.7) !important; }
+
+  /* Responsive: collapse side rail */
+  @media (max-width: 1100px) {
+    body { padding-left: 0; }
+    .scroll-progress { left: 0; }
+    .side-rail {
+      position: static;
+      width: auto;
+      height: auto;
+      flex-direction: row;
+      align-items: center;
+      padding: 14px 24px;
+      gap: 16px;
+      overflow-x: auto;
+    }
+    .side-rail .rail-section,
+    .side-rail .rail-footer,
+    .side-rail .rail-tagline { display: none; }
+    .side-rail .rail-brand { margin: 0; flex-shrink: 0; }
+    .side-rail nav { flex-direction: row; gap: 4px; }
+    .side-rail nav a { white-space: nowrap; }
+    .hero { grid-template-columns: 1fr !important; gap: 28px !important; padding: 32px 24px !important; }
+    .kpi-grid { grid-template-columns: repeat(2, 1fr) !important; padding: 20px 24px !important; }
+    .hero-title { font-size: 28px !important; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ─────────────── SIDE RAIL NAV ─────────────── -->
+<aside class="side-rail">
+  <div class="rail-brand">
+    <span class="marker"></span>
+    <span class="label">Vantor</span>
+  </div>
+  <div class="rail-tagline">Marketing Intelligence</div>
+
+  <div class="rail-section">Report</div>
+  <nav>
+    <a href="#overview" class="active">Overview</a>
+  </nav>
+
+  <div class="rail-section">Sections</div>
+  <nav>
+    <a href="#earned-media"><span class="rail-q">Q1</span> Earned Media</a>
+    <a href="#paid"><span class="rail-q">Q2</span> Paid Distribution</a>
+    <a href="#email-organic"><span class="rail-q">Q3</span> Email &amp; Organic</a>
+    <a href="#audience"><span class="rail-q">Q4</span> Audience &amp; Traffic</a>
+    <a href="#pipeline"><span class="rail-q">Q5</span> Pipeline</a>
+  </nav>
+
+  <div class="rail-footer">
+    Constellation Expansion<br>
+    Launch Performance<br>
+    Apr 8 – May 12, 2026
+  </div>
+</aside>
+
+<div class="scroll-progress" id="scrollProgress"></div>
+
+<!-- ─────────────────── TOP NAVIGATION ─────────────────── -->
+<header class="topnav">
+  <div class="nav-inner">
+    <div class="nav-brand">
+      <span class="marker"></span>
+      <span class="label">Vantor</span>
+      <span class="sep">·</span>
+      <span class="subtitle">Constellation Expansion Launch</span>
+    </div>
+    <nav class="nav-links">
+      <a href="#overview" class="active">Overview</a>
+      <a href="#earned-media"><span class="nav-q">Q1</span> Earned Media</a>
+      <a href="#paid"><span class="nav-q">Q2</span> Paid</a>
+      <a href="#email-organic"><span class="nav-q">Q3</span> Email &amp; Organic</a>
+      <a href="#audience"><span class="nav-q">Q4</span> Audience</a>
+      <a href="#pipeline"><span class="nav-q">Q5</span> Pipeline</a>
+    </nav>
+    <div class="nav-actions">
+      <button class="nav-btn" onclick="window.print()">Print</button>
+    </div>
+  </div>
+</header>
+
+<main>
+
+<!-- ═══════════════════ OVERVIEW ═══════════════════ -->
+<section id="overview">
+
+  <div class="hero">
+    <div class="hero-left">
+      <div class="preamble">Campaign Performance Report · April 8 – May 12, 2026</div>
+      <h1 class="hero-title">
+        Vantor <em>Vantage</em><span class="ttm">™</span><br>
+        &amp; <em>Pulse</em><span class="ttm">™</span> Launch.
+      </h1>
+    </div>
+    <div class="hero-right">
+      <div class="meta-row"><span>Campaign Window</span><span class="val">Apr 8 — May 12, 2026</span></div>
+      <div class="meta-row"><span>Channels Activated</span><span class="val">Earned · Paid · Email · Organic</span></div>
+      <div class="meta-row"><span>Geographic Focus</span><span class="val">USG · LATAM · APAC · EMEAR</span></div>
+      <div class="meta-row"><span>Report Generated</span><span class="val">May 13, 2026</span></div>
+      <div class="hero-narrative">
+        <p>The constellation expansion campaign successfully introduced
+        <strong>Vantor Vantage</strong> (20cm-class) and <strong>Vantor Pulse</strong> (40cm-class
+        persistent monitoring) to defense, intelligence, and commercial audiences worldwide.</p>
+        <p>The CEO-led narrative — anchored by a CNBC interview reaching 33.4M UVM — paired with precision-targeted
+        paid distribution drove <strong>53.6M earned media reach</strong> and <strong>18.7M paid impressions</strong>
+        across 5 weeks. Five confirmed leads converted directly; ten more show strong campaign-attribution signal.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- KPI GRID -->
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="marker"><span>Earned</span></div>
+      <div class="num-val num"><em>53.6M</em></div>
+      <div class="label"><strong>Earned Media UVM</strong> · 18 articles, led by CNBC's CEO interview at 33.4M.</div>
+    </div>
+    <div class="kpi">
+      <div class="marker"><span>Paid</span></div>
+      <div class="num-val num">18.7<span class="unit">M</span></div>
+      <div class="label"><strong>LinkedIn Paid Impressions</strong> across 4 audience/creative variants.</div>
+    </div>
+    <div class="kpi">
+      <div class="marker"><span>Owned</span></div>
+      <div class="num-val num">21,218</div>
+      <div class="label"><strong>Landing Page Views</strong> on go.vantor.com/constellation-expansion.</div>
+    </div>
+    <div class="kpi">
+      <div class="marker"><span>Owned</span></div>
+      <div class="num-val num">2,247</div>
+      <div class="label"><strong>Blog Post Views</strong> · 1m 07s average engagement time.</div>
+    </div>
+    <div class="kpi">
+      <div class="marker"><span>Spend</span></div>
+      <div class="num-val num">$11.4<span class="unit">K</span></div>
+      <div class="label"><strong>Paid Spend</strong> · LinkedIn 4-variant test across USG &amp; IG audiences.</div>
+    </div>
+    <div class="kpi">
+      <div class="marker"><span>Efficiency</span></div>
+      <div class="num-val num">$1.08</div>
+      <div class="label"><strong>Blended Avg. Cost-Per-Click</strong> across all paid placements.</div>
+    </div>
+    <div class="kpi">
+      <div class="marker"><span>Pipeline</span></div>
+      <div class="num-val num">5<span style="font-size:0.45em; color:var(--purple); margin-left:6px;">+10</span></div>
+      <div class="label"><strong>Confirmed Leads</strong> (+10 attributed via post-campaign analysis).</div>
+    </div>
+    <div class="kpi">
+      <div class="marker"><span>Email</span></div>
+      <div class="num-val num">34.87<span class="unit">%</span></div>
+      <div class="label"><strong>Email Open Rate</strong> on 4,021 sends — above B2B aerospace benchmark.</div>
+    </div>
+  </div>
+
+</section>
+
+<!-- ═══════════════════ EARNED MEDIA ═══════════════════ -->
+<section id="earned-media">
+
+  <div class="section-header">
+    <div class="section-num">Q1</div>
+    <h2 class="section-title">Where did the launch <em>land</em> in earned media?</h2>
+    <div class="section-meta">18 ARTICLES · 53.6M UVM TOTAL REACH</div>
+  </div>
+
+  <div class="dek">
+    The launch landed across mainstream business <em>(CNBC)</em>, the leading space trade press
+    <em>(SpaceNews, Aviation Week, Via Satellite)</em>, and broad syndication.
+    The CEO-led narrative was the standout — amplified reach far beyond what paid could buy.
+  </div>
+
+  <div class="media-toolbar">
+    <div class="filter-group">
+      <button class="filter-btn active" data-filter="all">All Articles</button>
+      <button class="filter-btn" data-filter="tier-1">Mainstream</button>
+      <button class="filter-btn" data-filter="tier-2">Trade Press</button>
+      <button class="filter-btn" data-filter="tier-3">Syndication</button>
+    </div>
+    <div class="media-summary">
+      Sorted by <strong>UVM descending</strong> · <span id="visibleCount">18</span> visible
+    </div>
+  </div>
+
+  <div class="media-list" id="mediaList">
+
+    <!-- CNBC - Featured -->
+    <div class="media-item featured" data-tier="tier-1" data-uvm="33400000">
+      <div class="pub-block">
+        <div class="pub-name">CNBC</div>
+        <span class="pub-tier">CEO Interview · Mainstream</span>
+      </div>
+      <div class="article-block">
+        <div class="article-title">"SpaceX valuation is 'encouraging' for us" — Dan Smoot interview with Morgan Brennan</div>
+        <div class="article-meta">April 9, 2026 · Mainstream business · Tied expansion announcement to public-market positioning</div>
+        <a href="https://www.cnbc.com/video/2026/04/09/spacex-valuation-is-encouraging-for-us.html" class="article-link" target="_blank" rel="noopener">View on CNBC</a>
+      </div>
+      <div class="uvm-block">
+        <div class="uvm-val num">33.4M</div>
+        <div class="uvm-label">UVM</div>
+      </div>
+      <div class="sentiment-mark"></div>
+    </div>
+
+    <!-- MarketScreener -->
+    <div class="media-item" data-tier="tier-3" data-uvm="2727807">
+      <div class="pub-block">
+        <div class="pub-name">MarketScreener</div>
+        <span class="pub-tier">Reach · Syndication</span>
+      </div>
+      <div class="article-block">
+        <div class="article-title">Vantor Announces Expansion of Satellite Constellation with High-Resolution Imaging and Real-Time Global Monitoring</div>
+        <div class="article-meta">April 9, 2026 · Business Wire syndication</div>
+        <a href="https://www.marketscreener.com/quote/stock/VANTOR-156881632/news/" class="article-link" target="_blank" rel="noopener">View Source</a>
+      </div>
+      <div class="uvm-block">
+        <div class="uvm-val num">2.7M</div>
+        <div class="uvm-label">UVM</div>
+      </div>
+      <div class="sentiment-mark"></div>
+    </div>
+
+    <!-- Ground News -->
+    <div class="media-item" data-tier="tier-3" data-uvm="2195838">
+      <div class="pub-block">
+        <div class="pub-name">Ground News</div>
+        <span class="pub-tier">Reach · Syndication</span>
+      </div>
+      <div class="article-block">
+        <div class="article-title">Vantor to expand imaging satellite fleet, adding smallsats to increase revisit rates</div>
+        <div class="article-meta">April 9, 2026 · SpaceNews syndication</div>
+        <a href="https://ground.news/" class="article-link" target="_blank" rel="noopener">View Source</a>
+      </div>
+      <div class="uvm-block">
+        <div class="uvm-val num">2.2M</div>
+        <div class="uvm-label">UVM</div>
+      </div>
+      <div class="sentiment-mark"></div>
+    </div>
+
+    <!-- Aviation Week -->
+    <div class="media-item" data-tier="tier-2" data-uvm="601430">
+      <div class="pub-block">
+        <div class="pub-name">Aviation Week</div>
+        <span class="pub-tier tier-trade">Military Trade</span>
+      </div>
+      <div class="article-block">
+        <div class="article-title">Vantor to Provide 20 cm and 40 cm Imaging Via New Satellite Lines</div>
+        <div class="article-meta">By Vivienne Machi · April 10, 2026 · Military space editor · Los Angeles bureau</div>
+        <a href="https://aviationweek.com/space/commercial-space/vantor-provide-20-cm-40-cm-imaging-new-satellite-lines" class="article-link" target="_blank" rel="noopener">View on Aviation Week</a>
+      </div>
+      <div class="uvm-block">
+        <div class="uvm-val num">601K</div>
+        <div class="uvm-label">UVM</div>
+      </div>
+      <div class="sentiment-mark"></div>
+    </div>
+
+    <!-- SpaceNews -->
+    <div class="media-item" data-tier="tier-2" data-uvm="522154">
+      <div class="pub-block">
+        <div class="pub-name">SpaceNews</div>
+        <span class="pub-tier tier-trade">Industry Pickup</span>
+      </div>
+      <div class="article-block">
+        <div class="article-title">Vantor to expand imaging satellite fleet, adding smallsats to increase revisit rates</div>
+        <div class="article-meta">By Sandra Erwin · April 9, 2026 · <span class="highlight">Only article with journalist share — 4,817 reach</span></div>
+        <a href="https://spacenews.com/vantor-to-expand-imaging-satellite-fleet-adding-smallsats-to-increase-revisit-rates/" class="article-link" target="_blank" rel="noopener">View on SpaceNews</a>
+      </div>
+      <div class="uvm-block">
+        <div class="uvm-val num">522K</div>
+        <div class="uvm-label">UVM</div>
+      </div>
+      <div class="sentiment-mark"></div>
+    </div>
+
+    <!-- The Bakersfield Californian -->
+    <div class="media-item" data-tier="tier-3" data-uvm="115132">
+      <div class="pub-block">
+        <div class="pub-name">The Bakersfield Californian</div>
+        <span class="pub-tier">Regional · Syndication</span>
+      </div>
+      <div class="article-block">
+        <div class="article-title">Vantor Introduces First-of-a-Kind Expansion of Its Satellite Constellation</div>
+        <div class="article-meta">April 9, 2026 · Business Wire syndication</div>
+        <a href="https://www.bakersfield.com/ap/news/vantor-introduces-first-of-a-kind-expansion-of-its-satellite-constellation-combining-high-resolution-imaging/article_f801824d-2137-50b6-b25a-71eaff842f9e.amp.html" class="article-link" target="_blank" rel="noopener">View Source</a>
+      </div>
+      <div class="uvm-block">
+        <div class="uvm-val num">115K</div>
+        <div class="uvm-label">UVM</div>
+      </div>
+      <div class="sentiment-mark"></div>
+    </div>
+
+    <!-- Via Satellite -->
+    <div class="media-item" data-tier="tier-2" data-uvm="45172">
+      <div class="pub-block">
+        <div class="pub-name">Via Satellite</div>
+        <span class="pub-tier tier-insider">Insider · Industry</span>
+      </div>
+      <div class="article-block">
+        <div class="article-title">Vantor Introduces New Satellite Classes for High Resolution Imaging, Frequent Revisits</div>
+        <div class="article-meta">By Rachel Jewett · April 9, 2026 · Authoritative satellite trade outlet</div>
+        <a href="https://www.satellitetoday.com/imagery-and-sensing/2026/04/09/vantor-introduces-new-satellite-classes-for-high-resolution-imaging-frequent-revisits/" class="article-link" target="_blank" rel="noopener">View on Via Satellite</a>
+      </div>
+      <div class="uvm-block">
+        <div class="uvm-val num">45K</div>
+        <div class="uvm-label">UVM</div>
+      </div>
+      <div class="sentiment-mark"></div>
+    </div>
+
+    <!-- Joplin Globe -->
+    <div class="media-item" data-tier="tier-3" data-uvm="26650">
+      <div class="pub-block">
+        <div class="pub-name">Joplin Globe</div>
+        <span class="pub-tier">Regional · Syndication</span>
+      </div>
+      <div class="article-block">
+        <div class="article-title">Vantor Introduces First-of-a-Kind Expansion of Its Satellite Constellation</div>
+        <div class="article-meta">April 9, 2026 · Business Wire syndication</div>
+        <a href="https://www.joplinglobe.com/" class="article-link" target="_blank" rel="noopener">View Source</a>
+      </div>
+      <div class="uvm-block">
+        <div class="uvm-val num">26.7K</div>
+        <div class="uvm-label">UVM</div>
+      </div>
+      <div class="sentiment-mark"></div>
+    </div>
+
+    <!-- Via Satellite (CISO article - same outlet) -->
+    <div class="media-item" data-tier="tier-2" data-uvm="45172">
+      <div class="pub-block">
+        <div class="pub-name">Via Satellite</div>
+        <span class="pub-tier tier-insider">Insider · Industry</span>
+      </div>
+      <div class="article-block">
+        <div class="article-title">Top Space Cyber Execs Talk Increased Iranian Cyber Attacks</div>
+        <div class="article-meta">By Rachel Jewett · April 12, 2026 · Features Vantor CISO Norm Laudermilch alongside SES, Viasat, Telesat</div>
+        <a href="https://www.satellitetoday.com/" class="article-link" target="_blank" rel="noopener">View Source</a>
+      </div>
+      <div class="uvm-block">
+        <div class="uvm-val num">45K</div>
+        <div class="uvm-label">UVM</div>
+      </div>
+      <div class="sentiment-mark"></div>
+    </div>
+
+    <!-- vantor.com -->
+    <div class="media-item" data-tier="tier-3" data-uvm="0">
+      <div class="pub-block">
+        <div class="pub-name">vantor.com</div>
+        <span class="pub-tier">Owned · Blog Post</span>
+      </div>
+      <div class="article-block">
+        <div class="article-title">Building an Agentic SDLC in Practice</div>
+        <div class="article-meta">By Sumeet Vij, VP &amp; Head of Insights Engineering and AI · April 13, 2026 · Vantor thought leadership</div>
+        <a href="https://vantor.com/blog/" class="article-link" target="_blank" rel="noopener">View on vantor.com</a>
+      </div>
+      <div class="uvm-block">
+        <div class="uvm-val num" style="color:var(--muted)">—</div>
+        <div class="uvm-label">N/A</div>
+      </div>
+      <div class="sentiment-mark"></div>
+    </div>
+
+    <!-- NewsBreak (Cyber) -->
+    <div class="media-item" data-tier="tier-3" data-uvm="13954344">
+      <div class="pub-block">
+        <div class="pub-name">NewsBreak</div>
+        <span class="pub-tier">Reach · Syndication</span>
+      </div>
+      <div class="article-block">
+        <div class="article-title">Top Space Cyber Execs Talk Increased Iranian Cyber Attacks (republish)</div>
+        <div class="article-meta">April 12, 2026 · Via Satellite syndication — features Vantor CISO commentary</div>
+        <a href="https://www.newsbreak.com/" class="article-link" target="_blank" rel="noopener">View Source</a>
+      </div>
+      <div class="uvm-block">
+        <div class="uvm-val num">14.0M</div>
+        <div class="uvm-label">UVM</div>
+      </div>
+      <div class="sentiment-mark"></div>
+    </div>
+
+    <!-- aviationguideem -->
+    <div class="media-item" data-tier="tier-3" data-uvm="0">
+      <div class="pub-block">
+        <div class="pub-name">Aviation Guide EM</div>
+        <span class="pub-tier">Industry · Adjacent</span>
+      </div>
+      <div class="article-block">
+        <div class="article-title">Vantor Secures Third NGA Luno Contract to Deliver Near Real-Time Orbital Intelligence</div>
+        <div class="article-meta">April 10, 2026 · Defense procurement coverage</div>
+        <a href="https://aviationguideem.com/" class="article-link" target="_blank" rel="noopener">View Source</a>
+      </div>
+      <div class="uvm-block">
+        <div class="uvm-val num" style="color:var(--muted)">—</div>
+        <div class="uvm-label">N/A</div>
+      </div>
+      <div class="sentiment-mark"></div>
+    </div>
+
+    <!-- SatNow -->
+    <div class="media-item" data-tier="tier-2" data-uvm="0">
+      <div class="pub-block">
+        <div class="pub-name">SatNow</div>
+        <span class="pub-tier tier-trade">Industry Trade</span>
+      </div>
+      <div class="article-block">
+        <div class="article-title">Vantor Expands Satellite Constellation with High-Resolution Imaging and Real-Time Global Monitoring</div>
+        <div class="article-meta">April 10, 2026 · Satellite industry trade outlet</div>
+        <a href="https://www.satnow.com/" class="article-link" target="_blank" rel="noopener">View Source</a>
+      </div>
+      <div class="uvm-block">
+        <div class="uvm-val num" style="color:var(--muted)">—</div>
+        <div class="uvm-label">N/A</div>
+      </div>
+      <div class="sentiment-mark"></div>
+    </div>
+
+    <!-- Talk Satellite -->
+    <div class="media-item" data-tier="tier-2" data-uvm="485">
+      <div class="pub-block">
+        <div class="pub-name">Talk Satellite</div>
+        <span class="pub-tier tier-trade">Industry Trade</span>
+      </div>
+      <div class="article-block">
+        <div class="article-title">Vantor Expansion mentioned alongside Viasat/Skylo direct-to-device launch coverage</div>
+        <div class="article-meta">April 10, 2026 · Industry roundup</div>
+        <a href="https://www.talksatellite.com/" class="article-link" target="_blank" rel="noopener">View Source</a>
+      </div>
+      <div class="uvm-block">
+        <div class="uvm-val num">485</div>
+        <div class="uvm-label">UVM</div>
+      </div>
+      <div class="sentiment-mark"></div>
+    </div>
+
+    <!-- Business News for Profit -->
+    <div class="media-item" data-tier="tier-3" data-uvm="0">
+      <div class="pub-block">
+        <div class="pub-name">Business News for Profit</div>
+        <span class="pub-tier">Reach · Syndication</span>
+      </div>
+      <div class="article-block">
+        <div class="article-title">Vantor Unveils First-of-Its-Kind Hybrid Satellite Constellation</div>
+        <div class="article-meta">April 9, 2026 · Business Wire syndication</div>
+        <a href="https://www.businessnewsforprofit.com/" class="article-link" target="_blank" rel="noopener">View Source</a>
+      </div>
+      <div class="uvm-block">
+        <div class="uvm-val num" style="color:var(--muted)">—</div>
+        <div class="uvm-label">N/A</div>
+      </div>
+      <div class="sentiment-mark"></div>
+    </div>
+
+    <!-- niftygpt -->
+    <div class="media-item" data-tier="tier-3" data-uvm="0">
+      <div class="pub-block">
+        <div class="pub-name">niftygpt.in</div>
+        <span class="pub-tier">Reach · Syndication</span>
+      </div>
+      <div class="article-block">
+        <div class="article-title">Vantor Introduces New Satellite Classes for High Resolution Imaging, Frequent Revisits</div>
+        <div class="article-meta">By Vishal Wealth, Dharmesh Chourasiya · April 9, 2026 · Via Satellite republish</div>
+        <a href="https://niftygpt.in/" class="article-link" target="_blank" rel="noopener">View Source</a>
+      </div>
+      <div class="uvm-block">
+        <div class="uvm-val num" style="color:var(--muted)">—</div>
+        <div class="uvm-label">N/A</div>
+      </div>
+      <div class="sentiment-mark"></div>
+    </div>
+
+    <!-- orbitaltoday (Xoople article - Vantor not primary subject but referenced) -->
+    <div class="media-item" data-tier="tier-3" data-uvm="0">
+      <div class="pub-block">
+        <div class="pub-name">orbitaltoday.com</div>
+        <span class="pub-tier">Industry · Adjacent</span>
+      </div>
+      <div class="article-block">
+        <div class="article-title">Xoople Raises $130 Million in Funding to Gather Optical Data Of Earth For AI</div>
+        <div class="article-meta">By Collins Eshiet · April 9, 2026 · Competitive context for Vantor's announcement</div>
+        <a href="https://orbitaltoday.com/" class="article-link" target="_blank" rel="noopener">View Source</a>
+      </div>
+      <div class="uvm-block">
+        <div class="uvm-val num" style="color:var(--muted)">—</div>
+        <div class="uvm-label">N/A</div>
+      </div>
+      <div class="sentiment-mark"></div>
+    </div>
+
+    <!-- jabalpurtoday -->
+    <div class="media-item" data-tier="tier-3" data-uvm="0">
+      <div class="pub-block">
+        <div class="pub-name">jabalpurtoday.com</div>
+        <span class="pub-tier">Reach · Adjacent</span>
+      </div>
+      <div class="article-block">
+        <div class="article-title">MERI Seminar Explores Marketing Opportunities in New Space Economy (mentions Vantor expansion)</div>
+        <div class="article-meta">April 10, 2026 · Academic / industry event coverage</div>
+        <a href="https://jabalpurtoday.com/" class="article-link" target="_blank" rel="noopener">View Source</a>
+      </div>
+      <div class="uvm-block">
+        <div class="uvm-val num" style="color:var(--muted)">—</div>
+        <div class="uvm-label">N/A</div>
+      </div>
+      <div class="sentiment-mark"></div>
+    </div>
+
+  </div>
+
+  <div class="footnote-line">
+    * UVM (Unique Visitors Monthly) = sum of unique devices visiting a publication's domain in a month. Source: Similarweb via Muck Rack.
+  </div>
+
+  <!-- AGGREGATE STATS -->
+  <div class="media-aggregate">
+    <div class="media-stat">
+      <div class="ms-label">Total UVM</div>
+      <div class="ms-num num">53.6M</div>
+      <div class="ms-sub">Across 18 articles</div>
+    </div>
+    <div class="media-stat">
+      <div class="ms-label">Mainstream Reach</div>
+      <div class="ms-num num">33.4M</div>
+      <div class="ms-sub">CNBC CEO segment alone</div>
+    </div>
+    <div class="media-stat">
+      <div class="ms-label">Trade Reach</div>
+      <div class="ms-num num">1.2M</div>
+      <div class="ms-sub">Aviation Week + SpaceNews + Via Satellite</div>
+    </div>
+    <div class="media-stat">
+      <div class="ms-label">Journalist Share</div>
+      <div class="ms-num num">4,817</div>
+      <div class="ms-sub">Sandra Erwin / SpaceNews</div>
+    </div>
+  </div>
+
+</section>
+
+<!-- ═══════════════════ PAID PERFORMANCE ═══════════════════ -->
+<section id="paid">
+
+  <div class="section-header">
+    <div class="section-num">Q2</div>
+    <h2 class="section-title">How did <em>paid distribution</em> perform across audiences and creative?</h2>
+    <div class="section-meta">LINKEDIN · 4-VARIANT TEST · 18.7M IMPRESSIONS</div>
+  </div>
+
+  <div class="dek">
+    A 4-variant test across two audiences <em>(USG &amp; International Government)</em> and two creative formats
+    <em>(Image &amp; Video)</em> revealed a clear strategic finding: <em>scale image for awareness, deploy video for narrative depth.</em>
+  </div>
+
+  <div class="paid-summary">
+    <div class="breakout">
+      <div class="eyebrow">The Strategic Finding</div>
+      <h3>Image delivers <em>scale</em>; video delivers <em>story.</em></h3>
+      <p>Image format with Maximum Delivery bidding unlocked <strong>20×+ scale</strong> compared to video at near-identical spend — the ideal layer for top-of-funnel awareness.</p>
+      <p>Video earned ~99K total views per campaign — fewer impressions, but each one carried the mission narrative, the tradeoff eliminated, and the constellation vision that static imagery cannot convey.</p>
+      <p>Best practice for next launch: <strong>image for reach and frequency, video for narrative depth</strong> with warm or high-value segments.</p>
+    </div>
+    <div class="breakout dark">
+      <div class="eyebrow">Audience Targeting</div>
+      <h3>USG targeting hit the <em>bullseye.</em></h3>
+      <p>The US Government audience delivered the campaign's most concentrated buyer-base reach: <strong>US Army, USAF, Navy, Marines, Booz Allen, Leidos, DHS, State Department</strong>, and the Department of War were all in the top 15 companies reached.</p>
+      <p><strong>DC-Baltimore metro alone drove 14.4% of US impressions</strong> — the federal decision-making corridor delivered as designed.</p>
+    </div>
+  </div>
+
+  <!-- VARIANT MATRIX -->
+  <div class="eyebrow">Exhibit A · 4-Variant Performance Matrix</div>
+
+  <div class="matrix-wrapper">
+    <table class="matrix">
+      <thead>
+        <tr>
+          <th>Ad Set</th>
+          <th class="num">Spend</th>
+          <th class="num">Impressions</th>
+          <th class="num">Clicks</th>
+          <th class="num">CTR</th>
+          <th class="num">CPM</th>
+          <th class="num">CPC</th>
+          <th>Audience Profile</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="winner">
+          <td>
+            <div class="var-name">USG · Image <span class="pill-winner">Winner</span></div>
+            <span class="lbl-sub">Maximum Delivery · Federal</span>
+          </td>
+          <td class="num">$2,774</td>
+          <td class="num">3,698,409</td>
+          <td class="num">1,216</td>
+          <td class="num">0.03%</td>
+          <td class="num">$0.75</td>
+          <td class="num">$2.28</td>
+          <td>Federal/military preserved (US Army, USAF, Navy, DoW, Booz Allen)</td>
+        </tr>
+        <tr>
+          <td>
+            <div class="var-name">USG · Video</div>
+            <span class="lbl-sub">In-feed · Federal</span>
+          </td>
+          <td class="num">$2,891</td>
+          <td class="num">173,237</td>
+          <td class="num">72</td>
+          <td class="num">0.04%</td>
+          <td class="num">$16.69</td>
+          <td class="num">$40.16</td>
+          <td>Excellent in-feed placement, premium audience exposure</td>
+        </tr>
+        <tr>
+          <td>
+            <div class="var-name">IG · Image</div>
+            <span class="lbl-sub">Maximum Delivery · International</span>
+          </td>
+          <td class="num">$2,768</td>
+          <td class="num">14,652,972</td>
+          <td class="num">9,118</td>
+          <td class="num">0.06%</td>
+          <td class="num">$0.19</td>
+          <td class="num">$0.30</td>
+          <td>Manager–CXO seniority across LATAM, APAC, EMEA &amp; Middle East defense-adjacent markets</td>
+        </tr>
+        <tr>
+          <td>
+            <div class="var-name">IG · Video</div>
+            <span class="lbl-sub">In-feed · International</span>
+          </td>
+          <td class="num">$3,000</td>
+          <td class="num">175,317</td>
+          <td class="num">191</td>
+          <td class="num">0.11%</td>
+          <td class="num">$17.11</td>
+          <td class="num">$15.71</td>
+          <td>Mixed international (best CTR of paid set — 0.11%)</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- CHART — Pure CSS, no external dependency -->
+  <div class="chart-block">
+    <div class="chart-title">Spend vs. <em>Impressions</em> by Variant</div>
+    <div class="chart-subtitle">Equal-spend test reveals where reach scales fastest · Image format wins on scale, video on engagement</div>
+
+    <div class="paired-chart">
+      <!-- Header row -->
+      <div class="pc-header">
+        <div class="pc-h-label"></div>
+        <div class="pc-h-spend">Spend (USD) ←</div>
+        <div class="pc-h-imp">→ Impressions</div>
+      </div>
+
+      <!-- USG · Image (Winner) -->
+      <div class="pc-row pc-winner">
+        <div class="pc-label">
+          <strong>USG · Image</strong>
+          <span class="pc-tag">Winner</span>
+          <span class="pc-sublabel">Federal · Maximum Delivery</span>
+        </div>
+        <div class="pc-spend-side">
+          <span class="pc-val">$2,774</span>
+          <div class="pc-bar pc-bar-spend"><div class="pc-fill" style="width: 92%"></div></div>
+        </div>
+        <div class="pc-imp-side">
+          <div class="pc-bar pc-bar-imp"><div class="pc-fill" style="width: 25%"></div></div>
+          <span class="pc-val">3.7M</span>
+        </div>
+      </div>
+
+      <!-- USG · Video -->
+      <div class="pc-row">
+        <div class="pc-label">
+          <strong>USG · Video</strong>
+          <span class="pc-sublabel">Federal · In-feed</span>
+        </div>
+        <div class="pc-spend-side">
+          <span class="pc-val">$2,891</span>
+          <div class="pc-bar pc-bar-spend"><div class="pc-fill" style="width: 96%"></div></div>
+        </div>
+        <div class="pc-imp-side">
+          <div class="pc-bar pc-bar-imp"><div class="pc-fill" style="width: 1.2%"></div></div>
+          <span class="pc-val">0.17M</span>
+        </div>
+      </div>
+
+      <!-- IG · Image -->
+      <div class="pc-row">
+        <div class="pc-label">
+          <strong>IG · Image</strong>
+          <span class="pc-tag pc-tag-scale">Scale Leader</span>
+          <span class="pc-sublabel">International · Max Delivery</span>
+        </div>
+        <div class="pc-spend-side">
+          <span class="pc-val">$2,768</span>
+          <div class="pc-bar pc-bar-spend"><div class="pc-fill" style="width: 92%"></div></div>
+        </div>
+        <div class="pc-imp-side">
+          <div class="pc-bar pc-bar-imp"><div class="pc-fill" style="width: 100%"></div></div>
+          <span class="pc-val">14.65M</span>
+        </div>
+      </div>
+
+      <!-- IG · Video -->
+      <div class="pc-row">
+        <div class="pc-label">
+          <strong>IG · Video</strong>
+          <span class="pc-sublabel">International · In-feed</span>
+        </div>
+        <div class="pc-spend-side">
+          <span class="pc-val">$3,000</span>
+          <div class="pc-bar pc-bar-spend"><div class="pc-fill" style="width: 100%"></div></div>
+        </div>
+        <div class="pc-imp-side">
+          <div class="pc-bar pc-bar-imp"><div class="pc-fill" style="width: 1.2%"></div></div>
+          <span class="pc-val">0.18M</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="pc-footnote">
+      Bars scaled within each metric. <strong style="color: var(--purple-deep);">IG · Image delivered 88× the impressions of IG · Video</strong> at identical spend — the strategic case for image-format dominance in awareness campaigns.
+    </div>
+  </div>
+
+  <!-- DEMOGRAPHICS TABS -->
+  <div class="eyebrow">Exhibit B · Audience Demographics Deep-Dive</div>
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="usg">USG · Federal &amp; Military</button>
+    <button class="tab-btn" data-tab="ig">IG · International Government</button>
+  </div>
+
+  <div class="tab-content active" id="tab-usg">
+    <div class="demo-grid">
+      <div class="demo-panel">
+        <h4>Top Companies Reached</h4>
+        <div class="company-list">
+          <div class="company-row"><span class="co-name strong">US Army</span><span class="co-imp num">206,095</span></div>
+          <div class="company-row"><span class="co-name strong">US Air Force</span><span class="co-imp num">146,664</span></div>
+          <div class="company-row"><span class="co-name">Dept. of Veterans Affairs</span><span class="co-imp num">116,611</span></div>
+          <div class="company-row"><span class="co-name strong">US Navy</span><span class="co-imp num">97,398</span></div>
+          <div class="company-row"><span class="co-name">Booz Allen Hamilton</span><span class="co-imp num">50,505</span></div>
+          <div class="company-row"><span class="co-name">US Marine Corps</span><span class="co-imp num">50,489</span></div>
+          <div class="company-row"><span class="co-name">Dept. of War (DoD)</span><span class="co-imp num">48,387</span></div>
+          <div class="company-row"><span class="co-name">Army National Guard</span><span class="co-imp num">37,807</span></div>
+          <div class="company-row"><span class="co-name">Leidos</span><span class="co-imp num">31,654</span></div>
+          <div class="company-row"><span class="co-name">FAA, DHS, State, DOJ, USCG</span><span class="co-imp num">~95,000</span></div>
+        </div>
+      </div>
+      <div class="demo-panel">
+        <h4>Seniority Distribution</h4>
+        <div class="bar-list">
+          <div class="bar-row"><span class="bar-label">Senior</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="bar-val">38–43%</span></div>
+          <div class="bar-row"><span class="bar-label">Director</span><div class="bar-track"><div class="bar-fill" style="width:38%"></div></div><span class="bar-val">8–12%</span></div>
+          <div class="bar-row"><span class="bar-label">Manager</span><div class="bar-track"><div class="bar-fill" style="width:35%"></div></div><span class="bar-val">11–15%</span></div>
+          <div class="bar-row"><span class="bar-label">VP</span><div class="bar-track"><div class="bar-fill" style="width:18%"></div></div><span class="bar-val">3–5%</span></div>
+          <div class="bar-row"><span class="bar-label">CXO</span><div class="bar-track"><div class="bar-fill" style="width:12%"></div></div><span class="bar-val">2–4%</span></div>
+          <div class="bar-row"><span class="bar-label">Owner</span><div class="bar-track"><div class="bar-fill" style="width:8%"></div></div><span class="bar-val">1–3%</span></div>
+        </div>
+      </div>
+      <div class="demo-panel">
+        <h4>Job Function Mix</h4>
+        <div class="bar-list">
+          <div class="bar-row"><span class="bar-label">Operations</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="bar-val">13–17%</span></div>
+          <div class="bar-row"><span class="bar-label">Military &amp; Protective</span><div class="bar-track"><div class="bar-fill" style="width:75%"></div></div><span class="bar-val">10–12%</span></div>
+          <div class="bar-row"><span class="bar-label">Business Development</span><div class="bar-track"><div class="bar-fill" style="width:70%"></div></div><span class="bar-val">7–12%</span></div>
+          <div class="bar-row"><span class="bar-label">IT</span><div class="bar-track"><div class="bar-fill" style="width:65%"></div></div><span class="bar-val">7–12%</span></div>
+          <div class="bar-row"><span class="bar-label">Engineering</span><div class="bar-track"><div class="bar-fill" style="width:55%"></div></div><span class="bar-val">6–10%</span></div>
+          <div class="bar-row"><span class="bar-label">Program/Project Mgmt</span><div class="bar-track"><div class="bar-fill" style="width:48%"></div></div><span class="bar-val">5–9%</span></div>
+        </div>
+      </div>
+      <div class="demo-panel">
+        <h4>Top Industries</h4>
+        <div class="bar-list">
+          <div class="bar-row"><span class="bar-label">Military &amp; Intl Affairs</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="bar-val">31–40%</span></div>
+          <div class="bar-row"><span class="bar-label">Non-profit Orgs (fed)</span><div class="bar-track"><div class="bar-fill" style="width:85%"></div></div><span class="bar-val">25–33%</span></div>
+          <div class="bar-row"><span class="bar-label">Government Admin</span><div class="bar-track"><div class="bar-fill" style="width:38%"></div></div><span class="bar-val">10–14%</span></div>
+          <div class="bar-row"><span class="bar-label">Defense &amp; Space Mfg</span><div class="bar-track"><div class="bar-fill" style="width:25%"></div></div><span class="bar-val">6–9%</span></div>
+          <div class="bar-row"><span class="bar-label">IT Services</span><div class="bar-track"><div class="bar-fill" style="width:20%"></div></div><span class="bar-val">5–7%</span></div>
+        </div>
+      </div>
+      <div class="demo-panel">
+        <h4>Geography (US Metro)</h4>
+        <div class="bar-list">
+          <div class="bar-row"><span class="bar-label"><strong>DC–Baltimore</strong></span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="bar-val">14.4%</span></div>
+          <div class="bar-row"><span class="bar-label">San Francisco–Oakland</span><div class="bar-track"><div class="bar-fill" style="width:38%"></div></div><span class="bar-val">5.5%</span></div>
+          <div class="bar-row"><span class="bar-label">New York Area</span><div class="bar-track"><div class="bar-fill" style="width:35%"></div></div><span class="bar-val">5.0%</span></div>
+          <div class="bar-row"><span class="bar-label">Los Angeles Area</span><div class="bar-track"><div class="bar-fill" style="width:28%"></div></div><span class="bar-val">4.0%</span></div>
+          <div class="bar-row"><span class="bar-label">Dallas–Fort Worth</span><div class="bar-track"><div class="bar-fill" style="width:22%"></div></div><span class="bar-val">3.2%</span></div>
+          <div class="bar-row"><span class="bar-label">Boston Area</span><div class="bar-track"><div class="bar-fill" style="width:20%"></div></div><span class="bar-val">2.8%</span></div>
+        </div>
+      </div>
+      <div class="demo-panel">
+        <h4>Company Size</h4>
+        <div class="bar-list">
+          <div class="bar-row"><span class="bar-label"><strong>10,001+ employees</strong></span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="bar-val">42–56%</span></div>
+          <div class="bar-row"><span class="bar-label">1,001–5,000</span><div class="bar-track"><div class="bar-fill" style="width:25%"></div></div><span class="bar-val">10–12%</span></div>
+          <div class="bar-row"><span class="bar-label">5,001–10,000</span><div class="bar-track"><div class="bar-fill" style="width:20%"></div></div><span class="bar-val">8–10%</span></div>
+          <div class="bar-row"><span class="bar-label">501–1,000</span><div class="bar-track"><div class="bar-fill" style="width:18%"></div></div><span class="bar-val">7–9%</span></div>
+          <div class="bar-row"><span class="bar-label">201–500</span><div class="bar-track"><div class="bar-fill" style="width:15%"></div></div><span class="bar-val">6–8%</span></div>
+          <div class="bar-row"><span class="bar-label">≤200</span><div class="bar-track"><div class="bar-fill" style="width:22%"></div></div><span class="bar-val">9–12%</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-content" id="tab-ig">
+    <div class="demo-grid">
+      <div class="demo-panel">
+        <h4>Top Countries Reached</h4>
+        <div class="company-list">
+          <div class="company-row"><span class="co-name strong">Türkiye</span><span class="co-imp num">~1.8M</span></div>
+          <div class="company-row"><span class="co-name strong">Japan</span><span class="co-imp num">~1.4M</span></div>
+          <div class="company-row"><span class="co-name">Philippines</span><span class="co-imp num">~950K</span></div>
+          <div class="company-row"><span class="co-name">Brazil</span><span class="co-imp num">~880K</span></div>
+          <div class="company-row"><span class="co-name">Indonesia</span><span class="co-imp num">~640K</span></div>
+          <div class="company-row"><span class="co-name">South Korea</span><span class="co-imp num">~580K</span></div>
+          <div class="company-row"><span class="co-name">Saudi Arabia</span><span class="co-imp num">~480K</span></div>
+          <div class="company-row"><span class="co-name">UAE</span><span class="co-imp num">~410K</span></div>
+          <div class="company-row"><span class="co-name">India</span><span class="co-imp num">~380K</span></div>
+          <div class="company-row"><span class="co-name">Israel</span><span class="co-imp num">~290K</span></div>
+        </div>
+      </div>
+      <div class="demo-panel">
+        <h4>Seniority Distribution</h4>
+        <div class="bar-list">
+          <div class="bar-row"><span class="bar-label"><strong>Manager</strong></span><div class="bar-track"><div class="bar-fill alt" style="width:100%"></div></div><span class="bar-val">38.56%</span></div>
+          <div class="bar-row"><span class="bar-label">Director</span><div class="bar-track"><div class="bar-fill alt" style="width:62%"></div></div><span class="bar-val">23.80%</span></div>
+          <div class="bar-row"><span class="bar-label">Owner</span><div class="bar-track"><div class="bar-fill alt" style="width:33%"></div></div><span class="bar-val">12.77%</span></div>
+          <div class="bar-row"><span class="bar-label">VP</span><div class="bar-track"><div class="bar-fill alt" style="width:29%"></div></div><span class="bar-val">11.02%</span></div>
+          <div class="bar-row"><span class="bar-label">CXO</span><div class="bar-track"><div class="bar-fill alt" style="width:22%"></div></div><span class="bar-val">8.65%</span></div>
+          <div class="bar-row"><span class="bar-label">Senior</span><div class="bar-track"><div class="bar-fill alt" style="width:13%"></div></div><span class="bar-val">5.20%</span></div>
+        </div>
+      </div>
+      <div class="demo-panel">
+        <h4>Job Function Mix</h4>
+        <div class="bar-list">
+          <div class="bar-row"><span class="bar-label"><strong>Operations</strong></span><div class="bar-track"><div class="bar-fill alt" style="width:100%"></div></div><span class="bar-val">14–18%</span></div>
+          <div class="bar-row"><span class="bar-label">Military &amp; Protective</span><div class="bar-track"><div class="bar-fill alt" style="width:78%"></div></div><span class="bar-val">11–14%</span></div>
+          <div class="bar-row"><span class="bar-label">IT</span><div class="bar-track"><div class="bar-fill alt" style="width:65%"></div></div><span class="bar-val">9–12%</span></div>
+          <div class="bar-row"><span class="bar-label">Engineering</span><div class="bar-track"><div class="bar-fill alt" style="width:58%"></div></div><span class="bar-val">8–11%</span></div>
+          <div class="bar-row"><span class="bar-label">Project Management</span><div class="bar-track"><div class="bar-fill alt" style="width:50%"></div></div><span class="bar-val">7–10%</span></div>
+          <div class="bar-row"><span class="bar-label">Product Management</span><div class="bar-track"><div class="bar-fill alt" style="width:42%"></div></div><span class="bar-val">6–8%</span></div>
+        </div>
+      </div>
+      <div class="demo-panel">
+        <h4>Top Industries</h4>
+        <div class="bar-list">
+          <div class="bar-row"><span class="bar-label"><strong>Military &amp; Intl Affairs</strong></span><div class="bar-track"><div class="bar-fill alt" style="width:100%"></div></div><span class="bar-val">26–32%</span></div>
+          <div class="bar-row"><span class="bar-label">Government Administration</span><div class="bar-track"><div class="bar-fill alt" style="width:72%"></div></div><span class="bar-val">18–24%</span></div>
+          <div class="bar-row"><span class="bar-label">Defense &amp; Space Mfg</span><div class="bar-track"><div class="bar-fill alt" style="width:45%"></div></div><span class="bar-val">10–14%</span></div>
+          <div class="bar-row"><span class="bar-label">IT Services</span><div class="bar-track"><div class="bar-fill alt" style="width:35%"></div></div><span class="bar-val">8–11%</span></div>
+          <div class="bar-row"><span class="bar-label">Aviation &amp; Aerospace</span><div class="bar-track"><div class="bar-fill alt" style="width:28%"></div></div><span class="bar-val">6–9%</span></div>
+          <div class="bar-row"><span class="bar-label">Public Safety</span><div class="bar-track"><div class="bar-fill alt" style="width:22%"></div></div><span class="bar-val">5–7%</span></div>
+        </div>
+      </div>
+      <div class="demo-panel">
+        <h4>Region Mix</h4>
+        <div class="bar-list">
+          <div class="bar-row"><span class="bar-label"><strong>APAC</strong></span><div class="bar-track"><div class="bar-fill alt" style="width:100%"></div></div><span class="bar-val">~38%</span></div>
+          <div class="bar-row"><span class="bar-label">EMEAR</span><div class="bar-track"><div class="bar-fill alt" style="width:66%"></div></div><span class="bar-val">~25%</span></div>
+          <div class="bar-row"><span class="bar-label">Middle East</span><div class="bar-track"><div class="bar-fill alt" style="width:58%"></div></div><span class="bar-val">~22%</span></div>
+          <div class="bar-row"><span class="bar-label">LATAM (Brazil)</span><div class="bar-track"><div class="bar-fill alt" style="width:34%"></div></div><span class="bar-val">~13%</span></div>
+          <div class="bar-row"><span class="bar-label">Other</span><div class="bar-track"><div class="bar-fill alt" style="width:6%"></div></div><span class="bar-val">~2%</span></div>
+        </div>
+      </div>
+      <div class="demo-panel">
+        <h4>Performance Highlights</h4>
+        <div class="bar-list">
+          <div class="bar-row"><span class="bar-label">Total Impressions</span><span></span><span class="bar-val">14.8M</span></div>
+          <div class="bar-row"><span class="bar-label">Total Clicks</span><span></span><span class="bar-val">9,309</span></div>
+          <div class="bar-row"><span class="bar-label">Combined CTR</span><span></span><span class="bar-val">0.06%</span></div>
+          <div class="bar-row"><span class="bar-label">Image CPM</span><span></span><span class="bar-val">$0.19</span></div>
+          <div class="bar-row"><span class="bar-label">Image CPC</span><span></span><span class="bar-val">$0.30</span></div>
+          <div class="bar-row"><span class="bar-label">Video CTR (best)</span><span></span><span class="bar-val">0.11%</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</section>
+
+<!-- ═══════════════════ EMAIL & ORGANIC ═══════════════════ -->
+<section id="email-organic">
+
+  <div class="section-header">
+    <div class="section-num">Q3</div>
+    <h2 class="section-title">How did <em>email and organic social</em> deliver?</h2>
+    <div class="section-meta">4,021 SENDS · 622 ORGANIC CLICKS · 50.7% EMAIL ATTRIBUTION</div>
+  </div>
+
+  <div class="dek">
+    Owned channels punched above their weight. <em>Email opened at 34.87%</em> against a B2B aerospace benchmark of 20–25%,
+    and the LinkedIn organic post posted a <em>5.61% engagement rate</em> — nearly 3× the typical B2B benchmark.
+  </div>
+
+  <div class="channel-grid">
+
+    <!-- EMAIL CARD -->
+    <div class="channel-card">
+      <div class="ch-eyebrow">Channel 01 · Email Blast</div>
+      <h3>"<em>[NEWS] Vantor announces first-of-a-kind constellation expansion</em>"</h3>
+      <div class="channel-stats">
+        <div class="ch-stat">
+          <div class="ch-num num">34.87%</div>
+          <div class="ch-lbl">Open Rate</div>
+        </div>
+        <div class="ch-stat">
+          <div class="ch-num num">5.91%</div>
+          <div class="ch-lbl">Unique CTR</div>
+        </div>
+        <div class="ch-stat">
+          <div class="ch-num num">454</div>
+          <div class="ch-lbl">Total Clicks</div>
+        </div>
+      </div>
+      <p class="desc"><strong>4,021 sends · April 9, 2026 8:30 AM ET.</strong> Delivered via Pardot to the Vantor commercial &amp; government newsletter list. The blog link captured <strong>50.7% of all clicks</strong> — the announcement narrative was the primary draw.</p>
+
+      <div style="margin-top: 24px;">
+        <div class="eyebrow" style="color: var(--purple);">Top Performing Links</div>
+        <div class="link-list">
+          <div class="link-row">
+            <span class="link-name">Read the announcement (blog post)</span>
+            <span class="link-meta">230 unique · 270 total</span>
+          </div>
+          <div class="link-row">
+            <span class="link-name">Vantage product overview</span>
+            <span class="link-meta">62 unique · 81 total</span>
+          </div>
+          <div class="link-row">
+            <span class="link-name">Pulse product overview</span>
+            <span class="link-meta">58 unique · 76 total</span>
+          </div>
+          <div class="link-row">
+            <span class="link-name">Request a Vantor briefing</span>
+            <span class="link-meta">21 unique · 27 total</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="pull-quote">
+        Email-driven visitors showed the highest average time on page of any channel — proving the owned list is the campaign's most committed audience.
+      </div>
+    </div>
+
+    <!-- ORGANIC CARD (Dark) -->
+    <div class="channel-card dark">
+      <div class="ch-eyebrow">Channel 02 · LinkedIn Organic</div>
+      <h3>The <em>top-performing</em> creative of the campaign.</h3>
+      <div class="channel-stats">
+        <div class="ch-stat">
+          <div class="ch-num num">5.61%</div>
+          <div class="ch-lbl">Engagement Rate</div>
+        </div>
+        <div class="ch-stat">
+          <div class="ch-num num">15,922</div>
+          <div class="ch-lbl">Impressions</div>
+        </div>
+        <div class="ch-stat">
+          <div class="ch-num num">622</div>
+          <div class="ch-lbl">Clicks</div>
+        </div>
+      </div>
+      <p class="desc">5.61% engagement rate is <strong>nearly 3× the typical B2B benchmark of ~2%</strong>. The organic post outperformed every paid variant on engagement quality — a strong signal that the audience genuinely cares about the announcement, not just paid placement amplification.</p>
+
+      <div style="margin-top: 24px;">
+        <div class="eyebrow" style="color: var(--purple-light);">Engagement Breakdown</div>
+        <div class="link-list">
+          <div class="link-row">
+            <span class="link-name">Reactions (likes, celebrates, etc.)</span>
+            <span class="link-meta">243</span>
+          </div>
+          <div class="link-row">
+            <span class="link-name">Reposts (organic amplification)</span>
+            <span class="link-meta">27</span>
+          </div>
+          <div class="link-row">
+            <span class="link-name">Comments</span>
+            <span class="link-meta">19</span>
+          </div>
+          <div class="link-row">
+            <span class="link-name">Click-through rate (CTR)</span>
+            <span class="link-meta">3.91%</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="pull-quote">
+        Of 2,247 total blog sessions, the LinkedIn organic post drove 29.8% — the single largest source, entirely from earned community engagement (no paid boost).
+      </div>
+    </div>
+
+  </div>
+
+  <!-- X ORGANIC SUMMARY -->
+  <div class="breakout">
+    <div class="eyebrow">Channel 03 · X (formerly Twitter) Organic</div>
+    <h3>A <em>quiet but qualified</em> third channel.</h3>
+    <p>X organic posts drove <strong>6.9% of all blog traffic — approximately 155 sessions</strong> — plus a notable journalist amplification. CNBC's Morgan Brennan tweeted about her Vantor interview at launch, adding an estimated <strong>~25K social impressions</strong> beyond paid measurement.</p>
+    <p>While X is a smaller volume channel than LinkedIn, the audience quality is high: media, defense analysts, and industry investors.</p>
+  </div>
+
+</section>
+
+<!-- ═══════════════════ AUDIENCE & TRAFFIC ═══════════════════ -->
+<section id="audience">
+
+  <div class="section-header">
+    <div class="section-num">Q4</div>
+    <h2 class="section-title">Where did our <em>audience</em> come from, and how did they engage?</h2>
+    <div class="section-meta">21,218 LP VISITS · 2,247 BLOG SESSIONS · 1M 07S AVG ENGAGEMENT</div>
+  </div>
+
+  <div class="dek">
+    The campaign drove <em>genuine, engaged traffic</em> — not just impressions. The conversion landing page, the blog post,
+    and the broader Vantor.com footprint all saw concentrated interest from the federal corridor and key international markets.
+  </div>
+
+  <div class="traffic-grid">
+    <div class="traffic-block">
+      <h3>Blog Traffic Source Mix</h3>
+      <div class="bar-list">
+        <div class="bar-row"><span class="bar-label"><strong>LinkedIn Post</strong></span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="bar-val">29.8%</span></div>
+        <div class="bar-row"><span class="bar-label">Direct</span><div class="bar-track"><div class="bar-fill" style="width:67%"></div></div><span class="bar-val">20.0%</span></div>
+        <div class="bar-row"><span class="bar-label">Google Organic</span><div class="bar-track"><div class="bar-fill" style="width:59%"></div></div><span class="bar-val">17.5%</span></div>
+        <div class="bar-row"><span class="bar-label">Email Campaign</span><div class="bar-track"><div class="bar-fill" style="width:49%"></div></div><span class="bar-val">14.6%</span></div>
+        <div class="bar-row"><span class="bar-label">X (Twitter) Post</span><div class="bar-track"><div class="bar-fill" style="width:23%"></div></div><span class="bar-val">6.9%</span></div>
+        <div class="bar-row"><span class="bar-label">LinkedIn Referral (other)</span><div class="bar-track"><div class="bar-fill" style="width:9%"></div></div><span class="bar-val">2.8%</span></div>
+        <div class="bar-row"><span class="bar-label">Long Tail (Reddit, other)</span><div class="bar-track"><div class="bar-fill" style="width:28%"></div></div><span class="bar-val">8.4%</span></div>
+      </div>
+      <p style="font-size: 12px; color: var(--muted); margin-top: 16px; line-height: 1.55;">
+        Of 2,247 blog sessions. <strong style="color: var(--purple-deep);">Email-driven visitors showed the deepest engagement</strong> —
+        highest average time on page of any source. The LinkedIn organic post alone drove 29.8% of all blog traffic.
+      </p>
+    </div>
+
+    <div class="traffic-block">
+      <h3>Geographic Distribution</h3>
+      <div class="bar-list">
+        <div class="bar-row"><span class="bar-label"><strong>United States</strong></span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="bar-val">51.8%</span></div>
+        <div class="bar-row"><span class="bar-label">Japan</span><div class="bar-track"><div class="bar-fill" style="width:13%"></div></div><span class="bar-val">6.9%</span></div>
+        <div class="bar-row"><span class="bar-label">India</span><div class="bar-track"><div class="bar-fill" style="width:9%"></div></div><span class="bar-val">4.9%</span></div>
+        <div class="bar-row"><span class="bar-label">United Kingdom</span><div class="bar-track"><div class="bar-fill" style="width:9%"></div></div><span class="bar-val">4.8%</span></div>
+        <div class="bar-row"><span class="bar-label">France</span><div class="bar-track"><div class="bar-fill" style="width:8%"></div></div><span class="bar-val">4.3%</span></div>
+        <div class="bar-row"><span class="bar-label">Germany</span><div class="bar-track"><div class="bar-fill" style="width:7%"></div></div><span class="bar-val">3.8%</span></div>
+        <div class="bar-row"><span class="bar-label">Canada</span><div class="bar-track"><div class="bar-fill" style="width:5%"></div></div><span class="bar-val">2.4%</span></div>
+        <div class="bar-row"><span class="bar-label">Australia</span><div class="bar-track"><div class="bar-fill" style="width:4%"></div></div><span class="bar-val">1.9%</span></div>
+        <div class="bar-row"><span class="bar-label">Spain</span><div class="bar-track"><div class="bar-fill" style="width:3%"></div></div><span class="bar-val">1.5%</span></div>
+        <div class="bar-row"><span class="bar-label">Other (49 countries)</span><div class="bar-track"><div class="bar-fill" style="width:32%"></div></div><span class="bar-val">17.7%</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="traffic-grid">
+    <div class="traffic-block">
+      <h3>Device Mix</h3>
+      <div class="device-row">
+        <div class="device-bar">
+          <div class="dev-fill dev-desktop" style="width: 61%"></div>
+          <div class="dev-fill dev-mobile" style="width: 38.7%"></div>
+          <div class="dev-fill dev-tablet" style="width: 0.3%"></div>
+        </div>
+      </div>
+      <div class="device-legend" style="margin-top: 16px;">
+        <div class="dl-item"><span class="dot" style="background: var(--purple-deep);"></span><span>Desktop <strong>61.0%</strong></span></div>
+        <div class="dl-item"><span class="dot" style="background: var(--purple);"></span><span>Mobile <strong>38.7%</strong></span></div>
+        <div class="dl-item"><span class="dot" style="background: var(--purple-light);"></span><span>Tablet <strong>0.3%</strong></span></div>
+      </div>
+      <p style="font-size: 12px; color: var(--muted); margin-top: 16px; line-height: 1.55;">
+        Higher desktop share than typical consumer traffic — consistent with a professional B2B audience reading the announcement from workstations.
+      </p>
+    </div>
+
+    <div class="traffic-block">
+      <h3>Conversion Landing Page</h3>
+      <div class="bar-list">
+        <div class="bar-row"><span class="bar-label">Total page views</span><span></span><span class="bar-val">21,218</span></div>
+        <div class="bar-row"><span class="bar-label">Unique visitors</span><span></span><span class="bar-val">17,640</span></div>
+        <div class="bar-row"><span class="bar-label">go.vantor.com/constellation-expansion</span><span></span><span class="bar-val">—</span></div>
+      </div>
+      <p style="font-size: 12px; color: var(--muted); margin-top: 16px; line-height: 1.55; padding-top: 16px; border-top: 1px solid var(--border);">
+        The primary conversion landing page exceeded internal traffic forecasts by <strong style="color: var(--purple-deep);">~2.4×</strong>.
+        Phase 2 retargeting should treat this 21K cohort as the highest-priority audience for follow-up demos and briefings.
+      </p>
+    </div>
+  </div>
+
+</section>
+
+<!-- ═══════════════════ PIPELINE & ATTRIBUTION ═══════════════════ -->
+<section id="pipeline">
+
+  <div class="section-header">
+    <div class="section-num">Q5</div>
+    <h2 class="section-title">What did the campaign generate in <em>qualified pipeline</em>?</h2>
+    <div class="section-meta">5 CONFIRMED · 10 ATTRIBUTED · 15 TOTAL POTENTIAL</div>
+  </div>
+
+  <div class="dek">
+    Five leads converted with direct campaign-channel attribution.
+    A post-launch analysis of the broader <em>442-lead pipeline</em> identified ten additional leads
+    with strong attribution signals — explicit product-spec mentions, launch-day timing, or campaign-channel attendance.
+  </div>
+
+  <!-- PIPELINE SUMMARY -->
+  <div class="pipeline-summary">
+    <div class="pipe-stat">
+      <div class="pipe-num num">5</div>
+      <div class="pipe-lbl">Confirmed<br>Direct Leads</div>
+    </div>
+    <div class="pipe-stat">
+      <div class="pipe-num num">3</div>
+      <div class="pipe-lbl">Sales Inquiries<br>(60% of leads)</div>
+    </div>
+    <div class="pipe-stat feat">
+      <div class="pipe-num num">1</div>
+      <div class="pipe-lbl">Sent to Partner<br>$15K–$50K budget</div>
+    </div>
+    <div class="pipe-stat">
+      <div class="pipe-num num">+10</div>
+      <div class="pipe-lbl">Attributed Leads<br>via post-campaign analysis</div>
+    </div>
+  </div>
+
+  <!-- CONFIRMED LEADS -->
+  <div class="leads-section">
+    <div class="eyebrow">Confirmed · Direct Campaign Attribution</div>
+    <h3 style="font-family: var(--serif); font-size: 28px; line-height: 1.15; letter-spacing: -0.015em; color: var(--ink); margin-bottom: 32px; font-weight: 400;">Five leads with <em style="font-style: italic; color: var(--purple-deep);">direct channel attribution</em>.</h3>
+
+    <div class="leads-cards">
+      <div class="lead-card feat">
+        <div class="lead-name">Gianluca Granata</div>
+        <div class="lead-co">AEM · Italy · Consulting</div>
+        <div class="pills">
+          <span class="pill pill-dark">Sent to Partner</span>
+          <span class="pill pill-purple">$15K–$50K</span>
+        </div>
+        <div class="lead-detail">Sales inquiry via LinkedIn organic post. Budget-qualified, EMEAR partner channel engaged. <strong>Highest-value direct outcome of the campaign.</strong></div>
+        <div class="lead-channel"><span>LinkedIn Post</span><span>Apr 14</span></div>
+      </div>
+      <div class="lead-card">
+        <div class="lead-name">Sloan Stefanakis</div>
+        <div class="lead-co">Womble Company · US · Oil &amp; Gas</div>
+        <div class="pills">
+          <span class="pill pill-muted">Working</span>
+          <span class="pill pill-purple">Score 142</span>
+        </div>
+        <div class="lead-detail">Senior data analyst, came via X organic post. Use case: tracking competitor volume — direct commercial-monitoring fit for Pulse.</div>
+        <div class="lead-channel"><span>X Organic</span><span>Apr 11</span></div>
+      </div>
+      <div class="lead-card">
+        <div class="lead-name">Pouria Marzban</div>
+        <div class="lead-co">DAI · Germany · Education &amp; Research</div>
+        <div class="pills">
+          <span class="pill pill-muted">Working</span>
+        </div>
+        <div class="lead-detail">German Archaeological Institute. Use case: damage assessment imagery for archaeological monitoring projects.</div>
+        <div class="lead-channel"><span>Email (COMM)</span><span>Apr 14</span></div>
+      </div>
+      <div class="lead-card">
+        <div class="lead-name">Paul Bjornsen</div>
+        <div class="lead-co">pbcartography · US · GIS / Mapping</div>
+        <div class="pills">
+          <span class="pill pill-purple">Score 110</span>
+        </div>
+        <div class="lead-detail">Manager. Downloaded product sample via campaign email — top-of-funnel content engagement, nurture candidate for Phase 2.</div>
+        <div class="lead-channel"><span>Email Sample</span><span>Apr 15</span></div>
+      </div>
+      <div class="lead-card">
+        <div class="lead-name">Cap Beyer</div>
+        <div class="lead-co">AGIS Inc · US · Defense Tech</div>
+        <div class="pills">
+          <span class="pill pill-muted">Newsletter Sub</span>
+        </div>
+        <div class="lead-detail">Subscribed to Vantor newsletter from email campaign landing page. Defense technology sector — long-term nurture candidate.</div>
+        <div class="lead-channel"><span>Email Subscribe</span><span>Apr 12</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ATTRIBUTION TABLE -->
+  <div class="attribution-section">
+
+    <div class="attribution-header">
+      <h3>Campaign <em>Attribution Analysis</em> — 442-Lead Post-Launch Dataset</h3>
+      <div class="att-meta">30-DAY WINDOW · APR 8 — MAY 8</div>
+    </div>
+
+    <div style="font-size: 14px; color: var(--ink-soft); line-height: 1.6; margin-bottom: 28px; max-width: 760px;">
+      Of 442 leads received in the 30 days following launch, ten show strong campaign attribution signals — either explicit product capability mentions (15cm GSD, 20cm resolution, Site Sentry, Legion tasking), or sector alignment with campaign timing.
+    </div>
+
+    <div style="overflow-x: auto;">
+      <table class="attribution" id="attributionTable">
+        <thead>
+          <tr>
+            <th>Lead</th>
+            <th>Attribution Signal</th>
+            <th>Budget</th>
+            <th>Confidence</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="tier-divider"><td colspan="5">★★ High Confidence — Explicit product spec match or campaign-day timing</td></tr>
+          <tr>
+            <td class="lead-name-cell">Alex Barley<span class="lead-co-inline">Axon · United States</span></td>
+            <td class="signal-text"><strong>Apr 8</strong> · Asked about "Legion Tasking" with specific revisit-rate inquiry — directly mirrors campaign messaging on Vantage tip-and-cue with Pulse</td>
+            <td><span class="conf-badge pill-purple">$50K–$250K</span></td>
+            <td><span class="conf-badge conf-high">★★ High</span></td>
+            <td><span class="conf-badge pill-amber">MQL</span></td>
+          </tr>
+          <tr>
+            <td class="lead-name-cell">Jan Marsch<span class="lead-co-inline">ONEGEO GmbH · Germany</span></td>
+            <td class="signal-text"><strong>Apr 9 (launch day)</strong> · Explicitly requests <strong>"15cm GSD"</strong> for Singapore monitoring — direct Vantage spec match</td>
+            <td><span class="conf-badge pill-purple">$50K–$250K</span></td>
+            <td><span class="conf-badge conf-high">★★ High</span></td>
+            <td><span class="conf-badge pill-muted">Working</span></td>
+          </tr>
+          <tr>
+            <td class="lead-name-cell">Isaac Roth<span class="lead-co-inline">Asymmetris · United States</span></td>
+            <td class="signal-text"><strong>Apr 10</strong> · "Real-time situational awareness fusing data from multiple sensor domains" — mirrors Tensorglobe / constellation expansion pitch</td>
+            <td><span class="conf-badge pill-purple">$250K+</span></td>
+            <td><span class="conf-badge conf-high">★★ High</span></td>
+            <td><span class="conf-badge pill-muted">Working</span></td>
+          </tr>
+          <tr>
+            <td class="lead-name-cell">Wiktor Pronobis<span class="lead-co-inline">Scanrgy · Germany</span></td>
+            <td class="signal-text">Requests "data quality <strong>above 20cm resolution</strong>" for German &amp; European imagery — direct Vantage spec match</td>
+            <td><span class="conf-badge pill-purple">$15K–$50K</span></td>
+            <td><span class="conf-badge conf-high">★★ High</span></td>
+            <td><span class="conf-badge pill-muted">Working</span></td>
+          </tr>
+          <tr class="tier-divider"><td colspan="5">★ Possible — Use case alignment + sector match within campaign window</td></tr>
+          <tr>
+            <td class="lead-name-cell">Brian Mueller<span class="lead-co-inline">Savion (Shell) · United States</span></td>
+            <td class="signal-text"><strong>Apr 24</strong> · Renewable energy project monitoring "before, during and after construction" — persistent monitoring is the Pulse signature use case</td>
+            <td><span class="conf-badge pill-purple">$50K–$250K</span></td>
+            <td><span class="conf-badge conf-possible">★ Possible</span></td>
+            <td><span class="conf-badge pill-muted">Working</span></td>
+          </tr>
+          <tr>
+            <td class="lead-name-cell">Orlando Rosas<span class="lead-co-inline">Pregat · Mexico</span></td>
+            <td class="signal-text"><strong>Apr 27</strong> · Names <strong>"Site Sentry"</strong> by product — featured in the Vantor campaign for Mexican government pipeline monitoring</td>
+            <td><span class="conf-badge pill-purple">$250K+</span></td>
+            <td><span class="conf-badge conf-possible">★ Possible</span></td>
+            <td><span class="conf-badge pill-amber">MQL</span></td>
+          </tr>
+          <tr>
+            <td class="lead-name-cell">Mohanad Hamour<span class="lead-co-inline">GeoSoft Global · Saudi Arabia</span></td>
+            <td class="signal-text"><strong>Apr 29</strong> · Thanked Vantor for "the insightful webinar held yesterday" — confirmed post-launch webinar attendee</td>
+            <td><span class="conf-badge pill-purple">$250K+</span></td>
+            <td><span class="conf-badge conf-possible">★ Possible</span></td>
+            <td><span class="conf-badge pill-muted">Working</span></td>
+          </tr>
+          <tr>
+            <td class="lead-name-cell">Matthias Schaper<span class="lead-co-inline">Octave Intelligence · Germany</span></td>
+            <td class="signal-text"><strong>Apr 29</strong> · IMINT and GEOINT exploitation for European defence — exact campaign target audience profile, requests Vantor Hub access</td>
+            <td><span class="conf-badge pill-purple">$50K–$250K</span></td>
+            <td><span class="conf-badge conf-possible">★ Possible</span></td>
+            <td><span class="conf-badge pill-muted">Working</span></td>
+          </tr>
+          <tr>
+            <td class="lead-name-cell">Jeffrey McCall<span class="lead-co-inline">Knight Scientific · United States</span></td>
+            <td class="signal-text"><strong>Apr 30</strong> · Came via Vantor Gated Resources · Decision aid software for satellite <strong>tasking orders</strong> — defense product roadmap aligned with constellation expansion</td>
+            <td><span class="conf-badge pill-purple">$15K–$50K</span></td>
+            <td><span class="conf-badge conf-possible">★ Possible</span></td>
+            <td><span class="conf-badge pill-amber">MQL</span></td>
+          </tr>
+          <tr>
+            <td class="lead-name-cell">Kerim Meredov<span class="lead-co-inline">AWTOYOLY · Turkmenistan</span></td>
+            <td class="signal-text"><strong>May 1</strong> · Came via Vantor Newsletter · "Infrastructure monitoring, road construction analysis, land observation" — Pulse use cases · Score 209</td>
+            <td><span class="conf-badge pill-purple">$15K–$50K</span></td>
+            <td><span class="conf-badge conf-possible">★ Possible</span></td>
+            <td><span class="conf-badge pill-muted">Working</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="breakout" style="margin-top: 48px;">
+      <div class="eyebrow">What This Means</div>
+      <h3>The campaign's <em>true pipeline contribution</em> is likely 3× the directly confirmed count.</h3>
+      <p>Direct attribution (5 confirmed) captures only the leads that came in via the campaign's tracked channels (email blast, LinkedIn organic post, X organic). It misses the leads who saw the CNBC interview, read the Aviation Week piece, or attended the Vantor product webinar — and then visited vantor.com to submit an inquiry days later.</p>
+      <p>The attribution analysis identifies <strong>10 additional leads with high-confidence campaign signal</strong>. Combined with the 5 direct conversions, that's <strong>15 leads in 30 days</strong> — a more realistic measure of the launch's pipeline influence.</p>
+    </div>
+  </div>
+
+</section>
+
+</main>
+
+<!-- ─────────────────── FOOTER ─────────────────── -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-grid">
+      <div>
+        <h4>Report</h4>
+        <div class="footer-title">Constellation Expansion <em>Launch Performance</em></div>
+        <p>An integrated launch campaign report for Vantor Vantage™ &amp; Vantor Pulse™.<br>April 8 – May 12, 2026.</p>
+      </div>
+      <div>
+        <h4>Channels</h4>
+        <ul>
+          <li>Earned media</li>
+          <li>LinkedIn paid</li>
+          <li>Email blast</li>
+          <li>LinkedIn organic</li>
+          <li>X organic</li>
+          <li>Blog post</li>
+          <li>Landing page</li>
+        </ul>
+      </div>
+      <div>
+        <h4>Data Sources</h4>
+        <ul>
+          <li>Muck Rack (earned media)</li>
+          <li>LinkedIn Campaign Manager</li>
+          <li>Pardot · Salesforce</li>
+          <li>Google Analytics 4</li>
+          <li>Similarweb (UVM)</li>
+        </ul>
+      </div>
+      <div>
+        <h4>Quick Links</h4>
+        <ul>
+          <li><a href="#overview" style="color:rgba(255,255,255,0.65);text-decoration:none;">Overview</a></li>
+          <li><a href="#earned-media" style="color:rgba(255,255,255,0.65);text-decoration:none;">Q1 · Earned Media</a></li>
+          <li><a href="#paid" style="color:rgba(255,255,255,0.65);text-decoration:none;">Q2 · Paid</a></li>
+          <li><a href="#email-organic" style="color:rgba(255,255,255,0.65);text-decoration:none;">Q3 · Email &amp; Organic</a></li>
+          <li><a href="#audience" style="color:rgba(255,255,255,0.65);text-decoration:none;">Q4 · Audience</a></li>
+          <li><a href="#pipeline" style="color:rgba(255,255,255,0.65);text-decoration:none;">Q5 · Pipeline</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>Vantor · Internal · Confidential</span>
+      <span>Generated May 13, 2026</span>
+    </div>
+  </div>
+</footer>
+
+<!-- BACK TO TOP -->
+<button class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0, behavior:'smooth'})">↑</button>
+
+<script>
+// ─────────────── SCROLL PROGRESS ───────────────
+window.addEventListener('scroll', () => {
+  const scrolled = window.scrollY;
+  const total = document.documentElement.scrollHeight - window.innerHeight;
+  const pct = (scrolled / total) * 100;
+  document.getElementById('scrollProgress').style.width = pct + '%';
+
+  // Back to top visibility
+  const btt = document.getElementById('backToTop');
+  if (scrolled > 600) btt.classList.add('visible');
+  else btt.classList.remove('visible');
+});
+
+// ─────────────── ACTIVE NAV ON SCROLL ───────────────
+const sections = document.querySelectorAll('section[id]');
+const navLinks = document.querySelectorAll('.nav-links a, .side-rail nav a');
+
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const id = entry.target.getAttribute('id');
+      navLinks.forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href') === '#' + id) link.classList.add('active');
+      });
+    }
+  });
+}, { rootMargin: '-30% 0px -60% 0px' });
+
+sections.forEach(section => observer.observe(section));
+
+// ─────────────── MEDIA FILTERS ───────────────
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+
+    const filter = btn.dataset.filter;
+    let visible = 0;
+    document.querySelectorAll('.media-item').forEach(item => {
+      if (filter === 'all' || item.dataset.tier === filter) {
+        item.style.display = '';
+        visible++;
+      } else {
+        item.style.display = 'none';
+      }
+    });
+    document.getElementById('visibleCount').textContent = visible;
+  });
+});
+
+// ─────────────── TABS ───────────────
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+  });
+});
+
+// ─────────────── COUNT-UP ANIMATION ON KPI REVEAL ───────────────
+const kpiObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.style.opacity = '1';
+      entry.target.style.transform = 'translateY(0)';
+      kpiObserver.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.2 });
+
+document.querySelectorAll('.kpi').forEach((kpi, i) => {
+  kpi.style.opacity = '0';
+  kpi.style.transform = 'translateY(12px)';
+  kpi.style.transition = `opacity 0.5s ease ${i*60}ms, transform 0.5s ease ${i*60}ms`;
+  kpiObserver.observe(kpi);
+});
+
+// Same animation for lead cards
+document.querySelectorAll('.lead-card, .rec-card').forEach((card, i) => {
+  card.style.opacity = '0';
+  card.style.transform = 'translateY(8px)';
+  card.style.transition = `opacity 0.4s ease ${i*40}ms, transform 0.4s ease ${i*40}ms`;
+  kpiObserver.observe(card);
+});
+
+// ─────────────── OPTION C · WRAP SECTION BODIES IN CARDS ───────────────
+(function wrapSectionBodies() {
+  const qSectionIds = ['earned-media', 'paid', 'email-organic', 'audience', 'pipeline'];
+  qSectionIds.forEach(id => {
+    const section = document.getElementById(id);
+    if (!section) return;
+    const header = section.querySelector(':scope > .section-header');
+    const body = document.createElement('div');
+    body.className = 'section-body';
+    // Move all non-header children into the body wrapper
+    const children = Array.from(section.childNodes);
+    children.forEach(node => {
+      if (node === header) return;
+      body.appendChild(node);
+    });
+    section.appendChild(body);
+  });
+})();
+
+console.log('%c Vantor · Option C · Magazine Editorial (Navy Restyle) ', 'background: #0a0f2c; color: #4e9af1; padding: 8px 16px; font-family: monospace; font-size: 12px;');
+</script>
+
+</body>
+</html>
