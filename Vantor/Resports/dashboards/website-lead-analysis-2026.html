@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vantor Lead Intelligence Report 2026</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+@import url("https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=DM+Serif+Display:ital@0;1&display=swap");
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#0a0f2c;--dark:#0f1f4b;--blue:#1a5fd4;--sky:#4e9af1;--light-blue:#a8cff8;
+  --green:#2ecc71;--red:#e74c3c;--amber:#f39c12;--teal:#1abc9c;--purple:#8e44ad;
+  --bg:#f0f3f9;--white:#ffffff;--gray:#6b7a99;--light:#e8edf5;--border:#dde4f0;
+}
+body{font-family:"Sora",system-ui,sans-serif;background:var(--bg);color:var(--navy);font-size:13.5px}
+
+/* HEADER */
+.header{background:linear-gradient(135deg,var(--navy) 0%,var(--dark) 50%,#1a3a7a 100%);color:#fff;padding:44px 48px 36px;position:relative;overflow:hidden}
+.header::before{content:"";position:absolute;top:-60px;right:-60px;width:400px;height:400px;border-radius:50%;background:radial-gradient(circle,rgba(74,144,226,0.15) 0%,transparent 70%);pointer-events:none}
+.header::after{content:"";position:absolute;bottom:-80px;left:30%;width:500px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(30,215,96,0.05) 0%,transparent 70%);pointer-events:none}
+.eyebrow{font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--light-blue);margin-bottom:10px;font-weight:600}
+.header h1{font-family:"DM Serif Display",serif;font-size:30px;font-weight:400;margin-bottom:6px;line-height:1.25}
+.header .sub{font-size:12px;color:#8aadd4;margin-bottom:28px}
+.kpi-row{display:flex;gap:14px;flex-wrap:wrap}
+.kpi{background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.11);border-radius:10px;padding:14px 20px;min-width:120px;transition:background .2s}
+.kpi:hover{background:rgba(255,255,255,0.1)}
+.kpi .v{font-family:"DM Serif Display",serif;font-size:28px;color:var(--sky)}
+.kpi .l{font-size:9.5px;color:#7a9cc0;margin-top:2px;text-transform:uppercase;letter-spacing:1px}
+.kpi.g .v{color:#5dde85}
+.kpi.r .v{color:#ff7070}
+.kpi.a .v{color:#ffc857}
+
+/* FILTER BAR */
+.filter-bar{background:#fff;border-bottom:1px solid var(--border);padding:0 48px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(10,15,44,0.06)}
+.filter-bar .fl{font-size:11px;font-weight:600;color:var(--gray);text-transform:uppercase;letter-spacing:1px;margin-right:4px}
+.tab{border:none;background:none;padding:14px 16px;font-family:"Sora",sans-serif;font-size:12px;font-weight:600;color:var(--gray);cursor:pointer;border-bottom:3px solid transparent;transition:all .2s;white-space:nowrap}
+.tab:hover{color:var(--blue)}
+.tab.active{color:var(--blue);border-bottom-color:var(--blue)}
+.filter-bar .spacer{flex:1}
+.filter-bar .note{font-size:10.5px;color:var(--gray);font-style:italic}
+
+/* EXEC SUMMARY */
+.exec-summary{background:#fff;border-left:5px solid var(--blue);margin:24px 24px 0;padding:20px 24px;border-radius:0 10px 10px 0;font-size:13.5px;line-height:1.8;color:#334;box-shadow:0 1px 3px rgba(0,0,0,0.04)}
+.exec-summary strong{color:var(--dark)}
+.summary-dynamic{display:inline;font-weight:700;color:var(--blue)}
+
+/* CONTENT */
+.content{padding:24px;display:flex;flex-direction:column;gap:24px}
+
+/* CARDS */
+.card{background:#fff;border-radius:14px;padding:28px 32px;box-shadow:0 1px 3px rgba(10,15,44,0.06)}
+.card-header{display:flex;align-items:flex-start;gap:12px;margin-bottom:18px}
+.qbadge{background:var(--navy);color:#fff;font-size:9px;font-weight:700;padding:4px 10px;border-radius:20px;white-space:nowrap;margin-top:4px;letter-spacing:1.5px;text-transform:uppercase}
+.card h2{font-family:"DM Serif Display",serif;font-size:19px;font-weight:400;color:var(--navy);line-height:1.3}
+.answer{font-size:13px;color:#445;line-height:1.8;margin-bottom:18px}
+.answer strong{color:var(--dark)}
+.highlight{background:#eef5ff;border-left:3px solid var(--blue);padding:11px 15px;border-radius:0 8px 8px 0;margin:12px 0;font-size:12.5px;color:#2c4a7a;line-height:1.65}
+.highlight.amber{background:#fffbeb;border-left-color:var(--amber);color:#7a5a00}
+.highlight.green{background:#f0fff6;border-left-color:var(--green);color:#0f5c2e}
+
+/* GRIDS */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:22px;align-items:start}
+.g65{display:grid;grid-template-columns:1.75fr 1fr;gap:22px;align-items:start}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:22px}
+
+/* CHARTS */
+.chart-box{position:relative;width:100%}
+.chart-box canvas{max-height:270px}
+.chart-title{font-size:11px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px}
+
+/* TABLES */
+table{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:8px}
+th{background:#f7f9fd;color:var(--navy);font-weight:700;text-align:left;padding:9px 13px;border-bottom:2px solid var(--border);font-size:10px;letter-spacing:1px;text-transform:uppercase}
+td{padding:8px 13px;border-bottom:1px solid #f0f3fa;color:#334;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#f9fbff}
+.badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10.5px;font-weight:700}
+.bg{background:#eafaf1;color:#1a7a40}
+.br{background:#fdf0f0;color:#b22222}
+.ba{background:#fffbeb;color:#956500}
+.bb{background:#eef5ff;color:#1a4db0}
+.bpur{background:#f5f0ff;color:#5a2d8a}
+
+/* INLINE BAR */
+.ibar{display:inline-block;height:6px;border-radius:3px;margin-left:6px;vertical-align:middle;opacity:.7}
+
+/* RECS */
+.recs{background:linear-gradient(135deg,var(--navy) 0%,var(--dark) 100%);border-radius:14px;padding:32px;color:#fff}
+.recs h2{font-family:"DM Serif Display",serif;font-size:22px;font-weight:400;color:var(--light-blue);margin-bottom:24px}
+.rec{display:flex;gap:16px;margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid rgba(255,255,255,0.06)}
+.rec:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0}
+.rnum{background:rgba(78,154,241,0.15);border:1px solid rgba(78,154,241,0.25);color:var(--light-blue);font-weight:800;font-size:17px;width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:"DM Serif Display",serif}
+.rbody h3{font-size:13.5px;font-weight:700;color:#fff;margin-bottom:5px}
+.rbody p{font-size:12.5px;color:#8aaccc;line-height:1.65}
+.rbody .impact{font-size:9.5px;color:#5dde85;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin-top:7px}
+.disc{font-size:11px;color:#94a3b8;margin-top:8px;font-style:italic}
+
+/* MINI STAT PILLS */
+.stat-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+.stat-pill{background:var(--light);border-radius:8px;padding:10px 16px;display:flex;flex-direction:column;min-width:100px}
+.stat-pill .sv{font-size:22px;font-weight:700;color:var(--navy);font-family:"DM Serif Display",serif}
+.stat-pill .sl{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--gray);margin-top:2px}
+.stat-pill.g{background:#eafaf1} .stat-pill.g .sv{color:#1a7a40}
+.stat-pill.r{background:#fdf0f0} .stat-pill.r .sv{color:#b22222}
+.stat-pill.a{background:#fffbeb} .stat-pill.a .sv{color:#956500}
+.stat-pill.b{background:#eef5ff} .stat-pill.b .sv{color:#1a4db0}
+
+/* CONTEXT BOX */
+.context-box{background:#f7f9fd;border:1px solid var(--border);border-radius:8px;padding:12px 16px;font-size:12px;color:#445;line-height:1.65;margin-bottom:16px}
+.context-box .ctag{display:inline-block;background:var(--navy);color:#fff;font-size:9px;font-weight:700;padding:2px 7px;border-radius:4px;margin-right:6px;letter-spacing:1px;text-transform:uppercase;vertical-align:middle}
+
+/* MONTH INDICATOR */
+.month-badge{background:var(--blue);color:#fff;font-size:10px;font-weight:700;padding:3px 10px;border-radius:12px;margin-left:8px;letter-spacing:0.5px}
+
+@media(max-width:700px){
+  .g2,.g65,.g3{grid-template-columns:1fr}
+  .header,.filter-bar{padding-left:20px;padding-right:20px}
+  .content{padding:16px}
+  .card{padding:20px}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="eyebrow">Vantor &nbsp;&bull;&nbsp; Marketing Intelligence &nbsp;&bull;&nbsp; Interactive Report</div>
+  <h1>Website Lead Analysis &mdash; 2026</h1>
+  <div class="sub">Marketing Director &nbsp;|&nbsp; Jan &ndash; Apr 2026 &nbsp;|&nbsp; 1,201 leads &nbsp;|&nbsp; Use the filter below to explore by month</div>
+  <div class="kpi-row" id="header-kpis">
+    <div class="kpi"><div class="v">1,201</div><div class="l">Total Leads</div></div>
+    <div class="kpi g"><div class="v">409</div><div class="l">Quality (MQL+Working)</div></div>
+    <div class="kpi a"><div class="v">34.1%</div><div class="l">Quality Rate</div></div>
+    <div class="kpi r"><div class="v">444</div><div class="l">Disqualified (37%)</div></div>
+    <div class="kpi b" style="--sky:#a8cff8"><div class="v">347</div><div class="l">Sent to Partner</div></div>
+  </div>
+</div>
+
+<div class="filter-bar">
+  <span class="fl">Filter:</span>
+  <button class="tab active" data-period="all">Full Year to Date</button>
+  <button class="tab" data-period="2026-01">January</button>
+  <button class="tab" data-period="2026-02">February</button>
+  <button class="tab" data-period="2026-03">March</button>
+  <button class="tab" data-period="2026-04">April</button>
+  <div class="spacer"></div>
+  <span class="note">All charts and tables update on filter change</span>
+</div>
+
+<div class="exec-summary" id="exec-summary">
+  <strong>Executive Summary &mdash;</strong>
+  <span id="summary-text">Vantor received <strong>1,201</strong> website-sourced leads between January and April 2026. Of these, <strong>409 (34.1%)</strong> qualify as genuine business opportunities (MQL or Working), while <strong>444 (37%)</strong> were disqualified &mdash; 91% of those due solely to bad contact information. The US leads in volume (219 leads, 47% quality rate), while India (71%), Germany (59%), and the UK (54%) punch above their weight on quality. Paid Search launched in February and is still in early optimization with only $2,500 USD invested to date; at current CPL, costs are well below industry benchmarks with significant room to scale while maintaining efficiency. Attribution gaps in untracked traffic are partly structural: Apple&rsquo;s ITP blocks UTM cookie storage on iOS/Safari, and government agency browsers frequently block cookie persistence &mdash; both are industry-wide limitations in Vantor&rsquo;s sector.</span>
+</div>
+
+<div class="content">
+
+<!-- Q1 GEOGRAPHY -->
+<div class="card">
+  <div class="card-header"><span class="qbadge">Q1</span><h2>Where are our leads coming from &mdash; and how does geography align with our ICP?</h2></div>
+  <div id="q1-dynamic-answer" class="answer"></div>
+  <div class="g65">
+    <div>
+      <div class="chart-title">Top 10 Countries &mdash; Volume &amp; Quality</div>
+      <div class="chart-box"><canvas id="countryChart"></canvas></div>
+    </div>
+    <div>
+      <table id="country-table">
+        <thead><tr><th>Country</th><th>Total</th><th>Quality</th><th>Qual%</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Q2 INTENT -->
+<div class="card">
+  <div class="card-header"><span class="qbadge">Q2</span><h2>What problems and needs are our leads expressing?</h2></div>
+  <div class="answer">
+    Analysis of the free-text intent field (populated in 99.9% of records) reveals five dominant need clusters. The mix below is consistent across all months, though Defense &amp; GEOINT intent strengthens in March and April as paid campaigns scale.
+  </div>
+  <table>
+    <thead><tr><th>Intent Cluster</th><th>Representative Entries</th><th>Commercial Signal</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Imagery for operational analysis</strong></td><td>DSM for site suitability, SWIR data, environmental/geological research, crop monitoring</td><td><span class="badge bg">High</span></td></tr>
+      <tr><td><strong>Defense / Government GEOINT</strong></td><td>GEOINT along US/MX border, monitoring Venezuela, Legion constellation tasking</td><td><span class="badge bg">High</span></td></tr>
+      <tr><td><strong>Commercial SaaS / API integration</strong></td><td>Imagery into premium products, Maps API for lawn care/pest control, EVTOL SSD data</td><td><span class="badge bg">High</span></td></tr>
+      <tr><td><strong>Academic / free license requests</strong></td><td>Free academic license for teaching, student research, non-profit university affiliation</td><td><span class="badge br">None &mdash; Noise</span></td></tr>
+      <tr><td><strong>Low-intent / vague / bot</strong></td><td>&ldquo;just for fun,&rdquo; single characters, non-English filler text, test entries</td><td><span class="badge br">None &mdash; Disqualify</span></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- Q3 QUALITY -->
+<div class="card">
+  <div class="card-header"><span class="qbadge">Q3</span><h2>How many leads are genuine business opportunities vs. noise?</h2></div>
+  <div id="q3-pills" class="stat-row"></div>
+  <div id="q3-dynamic-answer" class="answer"></div>
+  <div class="g2">
+    <div>
+      <div class="chart-title">Lead Quality Segmentation</div>
+      <div class="chart-box"><canvas id="qualDonut"></canvas></div>
+    </div>
+    <div>
+      <div class="chart-title">Budget Distribution &mdash; Quality Leads Only</div>
+      <div class="chart-box"><canvas id="budgetChart"></canvas></div>
+    </div>
+  </div>
+  <p class="disc">* &ldquo;Quality&rdquo; = MQL + Working CRM status. Budget breakdown for quality leads only.</p>
+</div>
+
+<!-- Q4+Q5 CHANNELS -->
+<div class="card">
+  <div class="card-header"><span class="qbadge">Q4 + Q5</span><h2>Which channels drive the most leads &mdash; and which produce the best quality?</h2></div>
+  <div class="context-box">
+    <span class="ctag">Context</span>
+    <strong>Paid Search context:</strong> Campaigns launched in February 2026. Total investment to date: <strong>~$2,500 USD</strong> across approximately three weeks of active spend. Current CPL is well below B2B SaaS industry benchmarks ($200&ndash;$500+ per quality lead). The program is still in active optimization &mdash; geo-exclusions have already been applied &mdash; and early-stage quality rates are expected to improve as audience signals accumulate and negative keyword lists mature.
+  </div>
+  <div class="context-box amber" style="background:#fffbeb;border-color:#f5d87a">
+    <span class="ctag" style="background:#956500">Context</span>
+    <strong>Attribution gap caveat:</strong> A significant share of &ldquo;untracked&rdquo; leads is structural, not operational. Apple&rsquo;s Intelligent Tracking Prevention (ITP) blocks UTM storage in Safari cookies across all iOS/macOS devices. Government agencies frequently disable cookie persistence entirely. Both are endemic in Vantor&rsquo;s defense, aerospace, and public-sector audience. Server-side tagging or first-party data capture (e.g., form hidden fields storing UTM at submission time) can mitigate this, but full attribution is unachievable in this vertical.
+  </div>
+  <div id="q45-dynamic-answer" class="answer"></div>
+  <div class="g2">
+    <div>
+      <div class="chart-title">Lead Volume by Channel</div>
+      <div class="chart-box"><canvas id="channelVol"></canvas></div>
+    </div>
+    <div>
+      <div class="chart-title">Quality Rate by Channel (%)</div>
+      <div class="chart-box"><canvas id="channelRate"></canvas></div>
+    </div>
+  </div>
+  <table id="channel-table" style="margin-top:20px">
+    <thead><tr><th>Channel</th><th>Total</th><th>Quality</th><th>Quality Rate</th><th>Notes</th></tr></thead>
+    <tbody></tbody>
+  </table>
+</div>
+
+<!-- Q6 SPAM -->
+<div class="card">
+  <div class="card-header"><span class="qbadge">Q6</span><h2>Which countries should be geo-excluded from ad targeting?</h2></div>
+  <div id="q6-dynamic-answer" class="answer"></div>
+  <table id="spam-table">
+    <thead><tr><th>Country</th><th>Total Leads</th><th>Disqualified</th><th>Disq Rate</th><th>Quality Leads</th><th>Action</th></tr></thead>
+    <tbody></tbody>
+  </table>
+  <p class="disc" style="margin-top:8px">* Threshold: &ge;50% disqualification rate with &ge;5 leads in the selected period. China: seven organic quality leads exist &mdash; block ads only, not the form.</p>
+</div>
+
+<!-- Q7 VELOCITY -->
+<div class="card">
+  <div class="card-header"><span class="qbadge">Q7</span><h2>What does lead velocity and trend look like over time?</h2></div>
+  <div class="answer">
+    The velocity chart below always shows the full year-to-date view regardless of the month filter, providing context for how the selected period fits into the broader trend. Volume is accelerating (average 242/month in Jan&ndash;Feb vs. 358/month in Mar&ndash;Apr), but quality rate is deteriorating: February delivered the best quality rate at 42%, while April has dropped to 24.6%. The April dip is partly attributable to Paid Search volume scaling before geo-exclusions were fully applied &mdash; an expected early-optimization pattern.
+  </div>
+  <div class="chart-box"><canvas id="velocityChart"></canvas></div>
+  <table style="margin-top:20px">
+    <thead><tr><th>Month</th><th>Total Leads</th><th>Quality</th><th>Disqualified</th><th>Quality Rate</th><th>Signal</th></tr></thead>
+    <tbody>
+      <tr><td>Jan 2026</td><td>261</td><td>100</td><td>82</td><td><span class="badge bg">38.3%</span></td><td>Baseline period</td></tr>
+      <tr><td>Feb 2026</td><td>224</td><td>94</td><td>53</td><td><span class="badge bg">42.0%</span></td><td>Best quality month &mdash; Paid Search just starting</td></tr>
+      <tr><td>Mar 2026</td><td>362</td><td>128</td><td>152</td><td><span class="badge ba">35.4%</span></td><td>Volume surge, noise rising with scale</td></tr>
+      <tr><td>Apr 2026</td><td>354</td><td>87</td><td>157</td><td><span class="badge br">24.6%</span></td><td>Geo-exclusions applied mid-month &mdash; monitor May</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- BONUS INDUSTRY -->
+<div class="card">
+  <div class="card-header"><span class="qbadge">Bonus</span><h2>Which industries are generating the most quality pipeline?</h2></div>
+  <div id="bonus-dynamic-answer" class="answer"></div>
+  <div class="g2">
+    <div>
+      <div class="chart-title">All Leads by Industry (Top 10)</div>
+      <div class="chart-box"><canvas id="industryAll"></canvas></div>
+    </div>
+    <div>
+      <div class="chart-title">Quality Leads by Industry (Top 10)</div>
+      <div class="chart-box"><canvas id="industryQual"></canvas></div>
+    </div>
+  </div>
+</div>
+
+<!-- RECOMMENDATIONS -->
+<div class="recs">
+  <h2>Top Five Prioritized Recommendations</h2>
+  <div class="rec">
+    <div class="rnum">1</div>
+    <div class="rbody">
+      <h3>Implement server-side UTM capture on the Contact Us form &mdash; before scaling spend</h3>
+      <p>Apple ITP and government cookie-blocking make client-side UTM tracking structurally unreliable for Vantor&rsquo;s audience. The fix is to capture UTM parameters as hidden form fields at submission time, storing them server-side before any cookie expires. This is a one-sprint engineering task and will dramatically improve attribution fidelity for the 19.7% of leads currently dark &mdash; leads that carry the highest quality rate (48.3%) in the dataset.</p>
+      <div class="impact">&#9679; Impact: High &mdash; foundational for all future spend optimization</div>
+    </div>
+  </div>
+  <div class="rec">
+    <div class="rnum">2</div>
+    <div class="rbody">
+      <h3>Continue Paid Search geo-exclusion rollout and add negative keyword layers</h3>
+      <p>Geo-exclusions already applied are the right move. At $2,500 total spend, CPL is well below industry benchmarks &mdash; the program has room to scale. Priority next actions: expand negative keywords (student, academic, university, free, research grant), add audience layering (in-market B2B professional segments), and test dedicated landing pages per vertical (Defense, GIS, SaaS). February&rsquo;s 45.8% quality rate shows the channel is capable of strong performance when properly targeted.</p>
+      <div class="impact">&#9679; Impact: High &mdash; scalable, below-benchmark CPL with clear optimization path</div>
+    </div>
+  </div>
+  <div class="rec">
+    <div class="rnum">3</div>
+    <div class="rbody">
+      <h3>Prioritize the 67 Defense &amp; Intelligence quality leads as Tier-1 pipeline immediately</h3>
+      <p>Government &mdash; Defense &amp; Intelligence is Vantor&rsquo;s highest-alignment vertical: mission-critical imagery needs, institutional budgets, and long contract cycles. These 67 leads should receive immediate SDR outreach with defense-specific messaging, not generic nurture. Cross-referencing with the 37 quality leads carrying budgets above $250,000 identifies the single highest-revenue-potential cohort in the entire dataset.</p>
+      <div class="impact">&#9679; Impact: High &mdash; highest near-term revenue potential</div>
+    </div>
+  </div>
+  <div class="rec">
+    <div class="rnum">4</div>
+    <div class="rbody">
+      <h3>Add company-email validation and CAPTCHA to the Contact Us form</h3>
+      <p>402 of 444 disqualifications (91%) were coded &ldquo;bad information.&rdquo; Blocking free-domain email addresses (Gmail, Yahoo, Hotmail) and adding a CAPTCHA step would eliminate the majority of bot and low-intent form submissions before they enter the CRM. This reduces SDR triage time, improves data hygiene, and gives monthly quality-rate metrics a more accurate baseline.</p>
+      <div class="impact">&#9679; Impact: Medium-High &mdash; reduces operational noise immediately</div>
+    </div>
+  </div>
+  <div class="rec">
+    <div class="rnum">5</div>
+    <div class="rbody">
+      <h3>Test LinkedIn Sponsored Content at modest budget &mdash; signal is promising</h3>
+      <p>LinkedIn delivered a 40% quality rate on only five leads &mdash; a small but directionally strong signal. Given that Vantor&rsquo;s ICP (VP/C-suite/Director at LATAM tech companies, defense contractors, and government-adjacent firms) is precisely LinkedIn&rsquo;s highest-value targeting surface, a $3,000&ndash;$5,000 test with job-function and seniority targeting could yield significantly more data. If quality rates hold above 35%, it becomes a primary channel to scale alongside Paid Search.</p>
+      <div class="impact">&#9679; Impact: Medium &mdash; high potential, low-cost validation possible</div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /content -->
+
+<script>
+// ============================================================
+// DATA
+// ============================================================
+const DATA = {"2026-01": {"total": 261, "quality": 100, "disq": 82, "partner": 79, "qual_pct": 38.3, "disq_pct": 31.4, "countries": [{"Country": "United States", "total": 53, "quality": 21, "disq": 12, "qual_pct": 39.6, "disq_pct": 22.6}, {"Country": "Canada", "total": 16, "quality": 7, "disq": 6, "qual_pct": 43.8, "disq_pct": 37.5}, {"Country": "Venezuela", "total": 11, "quality": 2, "disq": 9, "qual_pct": 18.2, "disq_pct": 81.8}, {"Country": "India", "total": 10, "quality": 8, "disq": 2, "qual_pct": 80.0, "disq_pct": 20.0}, {"Country": "Brazil", "total": 7, "quality": 1, "disq": 2, "qual_pct": 14.3, "disq_pct": 28.6}, {"Country": "Germany", "total": 6, "quality": 3, "disq": 2, "qual_pct": 50.0, "disq_pct": 33.3}, {"Country": "Turkey", "total": 6, "quality": 1, "disq": 3, "qual_pct": 16.7, "disq_pct": 50.0}, {"Country": "Saudi Arabia", "total": 5, "quality": 4, "disq": 0, "qual_pct": 80.0, "disq_pct": 0.0}, {"Country": "Mexico", "total": 5, "quality": 3, "disq": 1, "qual_pct": 60.0, "disq_pct": 20.0}, {"Country": "Nigeria", "total": 5, "quality": 1, "disq": 2, "qual_pct": 20.0, "disq_pct": 40.0}], "channels": [{"channel": "Organic / Direct", "total": 260, "quality": 99, "disq": 82, "qual_rate": 38.1}, {"channel": "Paid Search", "total": 1, "quality": 1, "disq": 0, "qual_rate": 100.0}], "industry_all": [{"industry": "Other", "count": 32}, {"industry": "Education & Research", "count": 28}, {"industry": "GIS/Mapping/Cadastral", "count": 24}, {"industry": "Government - Defense & Intelligence", "count": 20}, {"industry": "Telecommunications", "count": 15}, {"industry": "Agriculture", "count": 15}, {"industry": "Construction, Engineering, Architectural", "count": 15}, {"industry": "Technology / Location-Based Services", "count": 14}, {"industry": "Consulting & Professional Services", "count": 12}, {"industry": "Earth Science", "count": 8}], "industry_quality": [{"industry": "Education & Research", "count": 24}, {"industry": "Government - Defense & Intelligence", "count": 20}, {"industry": "GIS/Mapping/Cadastral", "count": 8}, {"industry": "Government - State/Local", "count": 6}, {"industry": "Telecommunications", "count": 6}, {"industry": "Government - Civil", "count": 5}, {"industry": "Technology / Location-Based Services", "count": 5}, {"industry": "Construction, Engineering, Architectural", "count": 4}, {"industry": "Consulting & Professional Services", "count": 3}, {"industry": "Security Products & Services", "count": 3}], "spam_countries": [{"Country": "Venezuela", "total": 11, "quality": 2, "disq": 9, "qual_pct": 18.2, "disq_pct": 81.8}, {"Country": "China", "total": 5, "quality": 2, "disq": 3, "qual_pct": 40.0, "disq_pct": 60.0}], "budget_quality": {"No Budget": 40, "Under $15K": 28, "$15K-$50K": 16, "$50K-$250K": 10, "Over $250K": 6}}, "2026-02": {"total": 224, "quality": 94, "disq": 53, "partner": 76, "qual_pct": 42.0, "disq_pct": 23.7, "countries": [{"Country": "United States", "total": 44, "quality": 25, "disq": 6, "qual_pct": 56.8, "disq_pct": 13.6}, {"Country": "India", "total": 12, "quality": 9, "disq": 2, "qual_pct": 75.0, "disq_pct": 16.7}, {"Country": "Canada", "total": 10, "quality": 3, "disq": 4, "qual_pct": 30.0, "disq_pct": 40.0}, {"Country": "United Kingdom", "total": 9, "quality": 5, "disq": 3, "qual_pct": 55.6, "disq_pct": 33.3}, {"Country": "Australia", "total": 7, "quality": 2, "disq": 1, "qual_pct": 28.6, "disq_pct": 14.3}, {"Country": "Egypt", "total": 7, "quality": 3, "disq": 2, "qual_pct": 42.9, "disq_pct": 28.6}, {"Country": "Indonesia", "total": 6, "quality": 4, "disq": 0, "qual_pct": 66.7, "disq_pct": 0.0}, {"Country": "Colombia", "total": 5, "quality": 2, "disq": 0, "qual_pct": 40.0, "disq_pct": 0.0}, {"Country": "Brazil", "total": 5, "quality": 2, "disq": 0, "qual_pct": 40.0, "disq_pct": 0.0}, {"Country": "Mexico", "total": 5, "quality": 3, "disq": 1, "qual_pct": 60.0, "disq_pct": 20.0}], "channels": [{"channel": "BuiltIn", "total": 1, "quality": 1, "disq": 0, "qual_rate": 100.0}, {"channel": "LinkedIn", "total": 4, "quality": 2, "disq": 1, "qual_rate": 50.0}, {"channel": "Organic / Direct", "total": 188, "quality": 77, "disq": 46, "qual_rate": 41.0}, {"channel": "Other", "total": 3, "quality": 0, "disq": 0, "qual_rate": 0.0}, {"channel": "Paid Search", "total": 24, "quality": 11, "disq": 6, "qual_rate": 45.8}, {"channel": "Website / Online", "total": 3, "quality": 3, "disq": 0, "qual_rate": 100.0}, {"channel": "X (Twitter)", "total": 1, "quality": 0, "disq": 0, "qual_rate": 0.0}], "industry_all": [{"industry": "Education & Research", "count": 24}, {"industry": "Other", "count": 22}, {"industry": "GIS/Mapping/Cadastral", "count": 18}, {"industry": "Government - Defense & Intelligence", "count": 14}, {"industry": "Consulting & Professional Services", "count": 14}, {"industry": "Construction, Engineering, Architectural", "count": 13}, {"industry": "Technology / Location-Based Services", "count": 12}, {"industry": "Finance", "count": 10}, {"industry": "Agriculture", "count": 10}, {"industry": "Earth Science", "count": 10}], "industry_quality": [{"industry": "Education & Research", "count": 21}, {"industry": "Government - Defense & Intelligence", "count": 13}, {"industry": "Consulting & Professional Services", "count": 6}, {"industry": "GIS/Mapping/Cadastral", "count": 5}, {"industry": "Government - Civil", "count": 5}, {"industry": "Technology / Location-Based Services", "count": 4}, {"industry": "Other", "count": 4}, {"industry": "Government - State/Local", "count": 4}, {"industry": "Security Products & Services", "count": 3}, {"industry": "Automotive / Transportation", "count": 3}], "spam_countries": [], "budget_quality": {"No Budget": 35, "Under $15K": 25, "$15K-$50K": 17, "$50K-$250K": 6, "Over $250K": 11}}, "2026-03": {"total": 362, "quality": 128, "disq": 152, "partner": 82, "qual_pct": 35.4, "disq_pct": 42.0, "countries": [{"Country": "United States", "total": 67, "quality": 31, "disq": 14, "qual_pct": 46.3, "disq_pct": 20.9}, {"Country": "Iraq", "total": 26, "quality": 6, "disq": 19, "qual_pct": 23.1, "disq_pct": 73.1}, {"Country": "India", "total": 18, "quality": 11, "disq": 7, "qual_pct": 61.1, "disq_pct": 38.9}, {"Country": "United Kingdom", "total": 13, "quality": 7, "disq": 2, "qual_pct": 53.8, "disq_pct": 15.4}, {"Country": "China", "total": 11, "quality": 3, "disq": 8, "qual_pct": 27.3, "disq_pct": 72.7}, {"Country": "Saudi Arabia", "total": 11, "quality": 6, "disq": 4, "qual_pct": 54.5, "disq_pct": 36.4}, {"Country": "United Arab Emirates", "total": 10, "quality": 5, "disq": 2, "qual_pct": 50.0, "disq_pct": 20.0}, {"Country": "Egypt", "total": 10, "quality": 0, "disq": 9, "qual_pct": 0.0, "disq_pct": 90.0}, {"Country": "Germany", "total": 9, "quality": 6, "disq": 1, "qual_pct": 66.7, "disq_pct": 11.1}, {"Country": "Algeria", "total": 9, "quality": 0, "disq": 5, "qual_pct": 0.0, "disq_pct": 55.6}], "channels": [{"channel": "Digital (Untracked)", "total": 80, "quality": 42, "disq": 18, "qual_rate": 52.5}, {"channel": "Email", "total": 1, "quality": 0, "disq": 1, "qual_rate": 0.0}, {"channel": "Organic / Direct", "total": 233, "quality": 68, "disq": 118, "qual_rate": 29.2}, {"channel": "Other", "total": 1, "quality": 1, "disq": 0, "qual_rate": 100.0}, {"channel": "Paid Search", "total": 46, "quality": 16, "disq": 15, "qual_rate": 34.8}, {"channel": "Website / Online", "total": 1, "quality": 1, "disq": 0, "qual_rate": 100.0}], "industry_all": [{"industry": "Education & Research", "count": 40}, {"industry": "Other", "count": 39}, {"industry": "Construction, Engineering, Architectural", "count": 31}, {"industry": "Government - Defense & Intelligence", "count": 27}, {"industry": "Agriculture", "count": 26}, {"industry": "Technology / Location-Based Services", "count": 24}, {"industry": "Earth Science", "count": 20}, {"industry": "GIS/Mapping/Cadastral", "count": 16}, {"industry": "Media / Communications", "count": 15}, {"industry": "Consulting & Professional Services", "count": 13}], "industry_quality": [{"industry": "Education & Research", "count": 33}, {"industry": "Government - Defense & Intelligence", "count": 24}, {"industry": "Technology / Location-Based Services", "count": 9}, {"industry": "Construction, Engineering, Architectural", "count": 6}, {"industry": "Media / Communications", "count": 6}, {"industry": "Government - Civil", "count": 5}, {"industry": "Finance", "count": 5}, {"industry": "Agriculture", "count": 4}, {"industry": "Government - State/Local", "count": 4}, {"industry": "Other", "count": 4}], "spam_countries": [{"Country": "Egypt", "total": 10, "quality": 0, "disq": 9, "qual_pct": 0.0, "disq_pct": 90.0}, {"Country": "Morocco", "total": 7, "quality": 0, "disq": 6, "qual_pct": 0.0, "disq_pct": 85.7}, {"Country": "Iraq", "total": 26, "quality": 6, "disq": 19, "qual_pct": 23.1, "disq_pct": 73.1}, {"Country": "China", "total": 11, "quality": 3, "disq": 8, "qual_pct": 27.3, "disq_pct": 72.7}, {"Country": "Indonesia", "total": 5, "quality": 2, "disq": 3, "qual_pct": 40.0, "disq_pct": 60.0}, {"Country": "Turkey", "total": 7, "quality": 1, "disq": 4, "qual_pct": 14.3, "disq_pct": 57.1}, {"Country": "Algeria", "total": 9, "quality": 0, "disq": 5, "qual_pct": 0.0, "disq_pct": 55.6}], "budget_quality": {"No Budget": 57, "Under $15K": 32, "$15K-$50K": 21, "$50K-$250K": 8, "Over $250K": 10}}, "2026-04": {"total": 354, "quality": 87, "disq": 157, "partner": 110, "qual_pct": 24.6, "disq_pct": 44.4, "countries": [{"Country": "United States", "total": 55, "quality": 26, "disq": 12, "qual_pct": 47.3, "disq_pct": 21.8}, {"Country": "Philippines", "total": 24, "quality": 0, "disq": 20, "qual_pct": 0.0, "disq_pct": 83.3}, {"Country": "Nigeria", "total": 12, "quality": 0, "disq": 5, "qual_pct": 0.0, "disq_pct": 41.7}, {"Country": "Uganda", "total": 10, "quality": 1, "disq": 3, "qual_pct": 10.0, "disq_pct": 30.0}, {"Country": "Ethiopia", "total": 10, "quality": 0, "disq": 10, "qual_pct": 0.0, "disq_pct": 100.0}, {"Country": "Pakistan", "total": 9, "quality": 2, "disq": 5, "qual_pct": 22.2, "disq_pct": 55.6}, {"Country": "Lebanon", "total": 9, "quality": 2, "disq": 4, "qual_pct": 22.2, "disq_pct": 44.4}, {"Country": "India", "total": 8, "quality": 6, "disq": 2, "qual_pct": 75.0, "disq_pct": 25.0}, {"Country": "Tanzania, United Republic of", "total": 7, "quality": 2, "disq": 0, "qual_pct": 28.6, "disq_pct": 0.0}, {"Country": "China", "total": 7, "quality": 1, "disq": 6, "qual_pct": 14.3, "disq_pct": 85.7}], "channels": [{"channel": "Digital (Untracked)", "total": 156, "quality": 72, "disq": 42, "qual_rate": 46.2}, {"channel": "LinkedIn", "total": 1, "quality": 0, "disq": 0, "qual_rate": 0.0}, {"channel": "Paid Search", "total": 197, "quality": 15, "disq": 115, "qual_rate": 7.6}], "industry_all": [{"industry": "Agriculture", "count": 38}, {"industry": "Other", "count": 34}, {"industry": "Earth Science", "count": 32}, {"industry": "Education & Research", "count": 31}, {"industry": "Automotive / Transportation", "count": 26}, {"industry": "Construction, Engineering, Architectural", "count": 22}, {"industry": "Environment", "count": 18}, {"industry": "Energy - Oil & Gas", "count": 17}, {"industry": "Consulting & Professional Services", "count": 15}, {"industry": "Technology / Location-Based Services", "count": 15}], "industry_quality": [{"industry": "Government - Defense & Intelligence", "count": 10}, {"industry": "Technology / Location-Based Services", "count": 8}, {"industry": "Other", "count": 7}, {"industry": "GIS/Mapping/Cadastral", "count": 7}, {"industry": "Energy - Oil & Gas", "count": 5}, {"industry": "Education & Research", "count": 5}, {"industry": "Government - Civil", "count": 5}, {"industry": "Telecommunications", "count": 4}, {"industry": "Agriculture", "count": 4}, {"industry": "Construction, Engineering, Architectural", "count": 3}], "spam_countries": [{"Country": "Ethiopia", "total": 10, "quality": 0, "disq": 10, "qual_pct": 0.0, "disq_pct": 100.0}, {"Country": "China", "total": 7, "quality": 1, "disq": 6, "qual_pct": 14.3, "disq_pct": 85.7}, {"Country": "Philippines", "total": 24, "quality": 0, "disq": 20, "qual_pct": 0.0, "disq_pct": 83.3}, {"Country": "Algeria", "total": 6, "quality": 0, "disq": 4, "qual_pct": 0.0, "disq_pct": 66.7}, {"Country": "Egypt", "total": 5, "quality": 0, "disq": 3, "qual_pct": 0.0, "disq_pct": 60.0}, {"Country": "France", "total": 5, "quality": 1, "disq": 3, "qual_pct": 20.0, "disq_pct": 60.0}, {"Country": "Ghana", "total": 5, "quality": 0, "disq": 3, "qual_pct": 0.0, "disq_pct": 60.0}, {"Country": "Yemen", "total": 5, "quality": 0, "disq": 3, "qual_pct": 0.0, "disq_pct": 60.0}, {"Country": "Pakistan", "total": 9, "quality": 2, "disq": 5, "qual_pct": 22.2, "disq_pct": 55.6}], "budget_quality": {"No Budget": 28, "Under $15K": 29, "$15K-$50K": 14, "$50K-$250K": 6, "Over $250K": 10}}, "all": {"total": 1201, "quality": 409, "disq": 444, "partner": 347, "qual_pct": 34.1, "disq_pct": 37.0, "countries": [{"Country": "United States", "total": 219, "quality": 103, "disq": 44, "qual_pct": 47.0, "disq_pct": 20.1}, {"Country": "India", "total": 48, "quality": 34, "disq": 13, "qual_pct": 70.8, "disq_pct": 27.1}, {"Country": "Iraq", "total": 36, "quality": 8, "disq": 24, "qual_pct": 22.2, "disq_pct": 66.7}, {"Country": "Canada", "total": 34, "quality": 14, "disq": 11, "qual_pct": 41.2, "disq_pct": 32.4}, {"Country": "Philippines", "total": 31, "quality": 3, "disq": 22, "qual_pct": 9.7, "disq_pct": 71.0}, {"Country": "United Kingdom", "total": 26, "quality": 14, "disq": 6, "qual_pct": 53.8, "disq_pct": 23.1}, {"Country": "China", "total": 25, "quality": 7, "disq": 18, "qual_pct": 28.0, "disq_pct": 72.0}, {"Country": "Brazil", "total": 24, "quality": 6, "disq": 5, "qual_pct": 25.0, "disq_pct": 20.8}, {"Country": "Egypt", "total": 23, "quality": 3, "disq": 15, "qual_pct": 13.0, "disq_pct": 65.2}, {"Country": "Nigeria", "total": 23, "quality": 1, "disq": 10, "qual_pct": 4.3, "disq_pct": 43.5}], "channels": [{"channel": "BuiltIn", "total": 1, "quality": 1, "disq": 0, "qual_rate": 100.0}, {"channel": "Digital (Untracked)", "total": 236, "quality": 114, "disq": 60, "qual_rate": 48.3}, {"channel": "Email", "total": 1, "quality": 0, "disq": 1, "qual_rate": 0.0}, {"channel": "LinkedIn", "total": 5, "quality": 2, "disq": 1, "qual_rate": 40.0}, {"channel": "Organic / Direct", "total": 681, "quality": 244, "disq": 246, "qual_rate": 35.8}, {"channel": "Other", "total": 4, "quality": 1, "disq": 0, "qual_rate": 25.0}, {"channel": "Paid Search", "total": 268, "quality": 43, "disq": 136, "qual_rate": 16.0}, {"channel": "Website / Online", "total": 4, "quality": 4, "disq": 0, "qual_rate": 100.0}, {"channel": "X (Twitter)", "total": 1, "quality": 0, "disq": 0, "qual_rate": 0.0}], "industry_all": [{"industry": "Other", "count": 127}, {"industry": "Education & Research", "count": 123}, {"industry": "Agriculture", "count": 89}, {"industry": "Construction, Engineering, Architectural", "count": 81}, {"industry": "Government - Defense & Intelligence", "count": 72}, {"industry": "Earth Science", "count": 70}, {"industry": "GIS/Mapping/Cadastral", "count": 70}, {"industry": "Technology / Location-Based Services", "count": 65}, {"industry": "Consulting & Professional Services", "count": 54}, {"industry": "Automotive / Transportation", "count": 50}], "industry_quality": [{"industry": "Education & Research", "count": 83}, {"industry": "Government - Defense & Intelligence", "count": 67}, {"industry": "Technology / Location-Based Services", "count": 26}, {"industry": "GIS/Mapping/Cadastral", "count": 22}, {"industry": "Government - Civil", "count": 20}, {"industry": "Other", "count": 17}, {"industry": "Government - State/Local", "count": 16}, {"industry": "Telecommunications", "count": 16}, {"industry": "Construction, Engineering, Architectural", "count": 16}, {"industry": "Media / Communications", "count": 14}], "spam_countries": [{"Country": "Iran, Islamic Republic of", "total": 6, "quality": 0, "disq": 6, "qual_pct": 0.0, "disq_pct": 100.0}, {"Country": "Ethiopia", "total": 13, "quality": 0, "disq": 13, "qual_pct": 0.0, "disq_pct": 100.0}, {"Country": "Syrian Arab Republic", "total": 7, "quality": 0, "disq": 7, "qual_pct": 0.0, "disq_pct": 100.0}, {"Country": "Afghanistan", "total": 9, "quality": 1, "disq": 8, "qual_pct": 11.1, "disq_pct": 88.9}, {"Country": "Venezuela", "total": 13, "quality": 2, "disq": 11, "qual_pct": 15.4, "disq_pct": 84.6}, {"Country": "Angola", "total": 5, "quality": 0, "disq": 4, "qual_pct": 0.0, "disq_pct": 80.0}, {"Country": "China", "total": 25, "quality": 7, "disq": 18, "qual_pct": 28.0, "disq_pct": 72.0}, {"Country": "Philippines", "total": 31, "quality": 3, "disq": 22, "qual_pct": 9.7, "disq_pct": 71.0}, {"Country": "Myanmar", "total": 10, "quality": 1, "disq": 7, "qual_pct": 10.0, "disq_pct": 70.0}, {"Country": "Iraq", "total": 36, "quality": 8, "disq": 24, "qual_pct": 22.2, "disq_pct": 66.7}, {"Country": "Egypt", "total": 23, "quality": 3, "disq": 15, "qual_pct": 13.0, "disq_pct": 65.2}, {"Country": "Thailand", "total": 5, "quality": 1, "disq": 3, "qual_pct": 20.0, "disq_pct": 60.0}, {"Country": "Yemen", "total": 10, "quality": 2, "disq": 6, "qual_pct": 20.0, "disq_pct": 60.0}, {"Country": "Lebanon", "total": 12, "quality": 2, "disq": 7, "qual_pct": 16.7, "disq_pct": 58.3}, {"Country": "Morocco", "total": 18, "quality": 3, "disq": 10, "qual_pct": 16.7, "disq_pct": 55.6}, {"Country": "Algeria", "total": 20, "quality": 3, "disq": 11, "qual_pct": 15.0, "disq_pct": 55.0}], "budget_quality": {"No Budget": 160, "Under $15K": 114, "$15K-$50K": 68, "$50K-$250K": 30, "Over $250K": 37}}, "monthly_trend": [{"month": "2026-01", "total": 261, "quality": 100, "disq": 82, "qual_pct": 38.3}, {"month": "2026-02", "total": 224, "quality": 94, "disq": 53, "qual_pct": 42.0}, {"month": "2026-03", "total": 362, "quality": 128, "disq": 152, "qual_pct": 35.4}, {"month": "2026-04", "total": 354, "quality": 87, "disq": 157, "qual_pct": 24.6}]};
+
+// ============================================================
+// CHART INSTANCES
+// ============================================================
+let charts = {};
+
+function destroyChart(id) {
+  if (charts[id]) { charts[id].destroy(); delete charts[id]; }
+}
+
+const C = {
+  navy:"#0a0f2c", blue:"#1a5fd4", sky:"#4e9af1", teal:"#1abc9c",
+  green:"#2ecc71", red:"#e74c3c", amber:"#f39c12", purple:"#8e44ad",
+  gray:"#bdc3d8", light:"#dde4f0",
+  greenA:"rgba(46,204,113,0.15)", redA:"rgba(231,76,60,0.15)"
+};
+
+const IND_COLORS = [C.amber,C.navy,C.blue,C.teal,C.green,"#16a085","#2980b9","#8e44ad","#7f8c8d","#c0392b"];
+
+// ============================================================
+// RENDER FUNCTIONS
+// ============================================================
+
+function renderKPIs(d) {
+  const el = document.getElementById("header-kpis");
+  const qr = d.qual_pct;
+  const qColor = qr >= 40 ? "#5dde85" : qr >= 30 ? "#ffc857" : "#ff7070";
+  el.innerHTML = `
+    <div class="kpi"><div class="v">${d.total.toLocaleString()}</div><div class="l">Total Leads</div></div>
+    <div class="kpi g"><div class="v">${d.quality.toLocaleString()}</div><div class="l">Quality (MQL+Working)</div></div>
+    <div class="kpi" style=""><div class="v" style="color:${qColor}">${d.qual_pct}%</div><div class="l">Quality Rate</div></div>
+    <div class="kpi r"><div class="v">${d.disq.toLocaleString()}</div><div class="l">Disqualified (${d.disq_pct}%)</div></div>
+    <div class="kpi"><div class="v" style="color:#a8cff8">${d.partner.toLocaleString()}</div><div class="l">Sent to Partner</div></div>
+  `;
+}
+
+function renderQ1(d, period) {
+  const top = d.countries.slice(0,10);
+  const labels = top.map(c=>c.Country.replace("United States","USA").replace("United Kingdom","UK").replace("Philippines","PH").replace("Saudi Arabia","KSA").replace("United Arab Emirates","UAE"));
+  const qual = top.map(c=>c.quality);
+  const disq = top.map(c=>c.disq);
+  const other = top.map(c=>Math.max(0,c.total-c.quality-c.disq));
+
+  destroyChart("countryChart");
+  charts["countryChart"] = new Chart(document.getElementById("countryChart"),{
+    type:"bar",
+    data:{labels,datasets:[
+      {label:"Quality",data:qual,backgroundColor:C.green},
+      {label:"Disqualified",data:disq,backgroundColor:C.red},
+      {label:"Other",data:other,backgroundColor:C.light}
+    ]},
+    options:{responsive:true,plugins:{legend:{position:"bottom",labels:{font:{size:10}}},title:{display:false}},scales:{x:{stacked:true,ticks:{font:{size:10}}},y:{stacked:true,ticks:{font:{size:10}}}}}
+  });
+
+  // Table
+  const tbody = document.querySelector("#country-table tbody");
+  tbody.innerHTML = top.map(c=>{
+    const qp = c.qual_pct;
+    const cls = qp>=50?"bg":qp>=30?"ba":"br";
+    return `<tr><td><strong>${c.Country}</strong></td><td>${c.total}</td><td>${c.quality}</td><td><span class="badge ${cls}">${qp}%</span></td></tr>`;
+  }).join("");
+
+  // Dynamic answer
+  const best = [...top].sort((a,b)=>b.qual_pct-a.qual_pct)[0];
+  const worst = [...top].filter(c=>c.total>=8).sort((a,b)=>b.disq_pct-a.disq_pct)[0];
+  document.getElementById("q1-dynamic-answer").innerHTML = `
+    The United States leads all countries with <strong>${top[0]?.total||0} leads</strong> and a <strong>${top[0]?.qual_pct||0}% quality rate</strong> &mdash; the expected primary market.
+    In this period, <strong>${best.Country}</strong> delivers the highest quality rate at <strong>${best.qual_pct}%</strong>.
+    ${worst ? `<strong>${worst.Country}</strong> is the worst performer with a <strong>${worst.disq_pct}% disqualification rate</strong> &mdash; nearly all flagged as &ldquo;bad information.&rdquo;` : ""}
+  `;
+}
+
+function renderQ3(d, period) {
+  // Pills
+  const hiVal = d.budget_quality["Over $250K"]||0;
+  const midVal = (d.budget_quality["$50K-$250K"]||0);
+  document.getElementById("q3-pills").innerHTML = `
+    <div class="stat-pill"><div class="sv">${d.total}</div><div class="sl">Total Leads</div></div>
+    <div class="stat-pill g"><div class="sv">${d.quality}</div><div class="sl">Quality Leads</div></div>
+    <div class="stat-pill a"><div class="sv">${d.qual_pct}%</div><div class="sl">Quality Rate</div></div>
+    <div class="stat-pill r"><div class="sv">${d.disq}</div><div class="sl">Disqualified</div></div>
+    <div class="stat-pill b"><div class="sv">${hiVal+midVal}</div><div class="sl">Budget &gt;$50K</div></div>
+  `;
+
+  destroyChart("qualDonut");
+  charts["qualDonut"] = new Chart(document.getElementById("qualDonut"),{
+    type:"doughnut",
+    data:{labels:["Quality (MQL+Working)","Disqualified","Sent to Partner","Inquiry"],datasets:[{data:[d.quality,d.disq,d.partner,Math.max(0,d.total-d.quality-d.disq-d.partner)],backgroundColor:[C.green,C.red,C.amber,C.gray],borderWidth:2,borderColor:"#fff"}]},
+    options:{responsive:true,plugins:{legend:{position:"bottom",labels:{font:{size:10}}}}}
+  });
+
+  const budgetOrder = ["No Budget","Under $15K","$15K-$50K","$50K-$250K","Over $250K"];
+  const budgetVals = budgetOrder.map(k=>d.budget_quality[k]||0);
+  destroyChart("budgetChart");
+  charts["budgetChart"] = new Chart(document.getElementById("budgetChart"),{
+    type:"bar",
+    data:{labels:budgetOrder,datasets:[{label:"Quality Leads",data:budgetVals,backgroundColor:[C.gray,C.sky,C.teal,C.blue,C.navy]}]},
+    options:{responsive:true,indexAxis:"y",plugins:{legend:{display:false}},scales:{x:{ticks:{font:{size:10}}},y:{ticks:{font:{size:10}}}}}
+  });
+
+  document.getElementById("q3-dynamic-answer").innerHTML = `
+    Of <strong>${d.total}</strong> leads in this period, <strong>${d.quality} (${d.qual_pct}%)</strong> are active quality opportunities (MQL or Working status).
+    <strong>${d.disq}</strong> were formally disqualified &mdash; the vast majority due to &ldquo;bad information.&rdquo;
+    Budget data among quality leads shows <strong>${hiVal+midVal} leads</strong> carry budgets above $50,000 &mdash; Vantor&rsquo;s highest-value near-term pipeline.
+  `;
+}
+
+function renderQ45(d, period) {
+  const channels = d.channels.filter(c=>c.total>0);
+  const mainChannels = ["Organic / Direct","Paid Search","Digital (Untracked)","LinkedIn","Other"];
+  const ch = mainChannels.map(name=>{
+    const found = channels.find(c=>c.channel===name)||{channel:name,total:0,quality:0,qual_rate:0};
+    return found;
+  });
+
+  destroyChart("channelVol");
+  charts["channelVol"] = new Chart(document.getElementById("channelVol"),{
+    type:"bar",
+    data:{labels:ch.map(c=>c.channel.replace("Organic / Direct","Organic/\nDirect").replace("Digital (Untracked)","Digital\n(Untracked)")),datasets:[
+      {label:"Quality",data:ch.map(c=>c.quality),backgroundColor:C.green},
+      {label:"Non-Quality",data:ch.map(c=>Math.max(0,c.total-c.quality)),backgroundColor:C.light}
+    ]},
+    options:{responsive:true,plugins:{legend:{position:"bottom",labels:{font:{size:10}}}},scales:{x:{stacked:true,ticks:{font:{size:10}}},y:{stacked:true,ticks:{font:{size:10}}}}}
+  });
+
+  const rateData = ch.filter(c=>c.total>=3);
+  destroyChart("channelRate");
+  charts["channelRate"] = new Chart(document.getElementById("channelRate"),{
+    type:"bar",
+    data:{labels:rateData.map(c=>c.channel.replace("Organic / Direct","Organic/\nDirect").replace("Digital (Untracked)","Digital\n(Untracked)")),datasets:[{label:"Quality Rate %",data:rateData.map(c=>c.qual_rate),backgroundColor:rateData.map(c=>c.qual_rate>=35?C.green:c.qual_rate>=20?C.amber:C.red)}]},
+    options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{max:100,ticks:{callback:v=>v+"%",font:{size:10}}},x:{ticks:{font:{size:10}}}}}
+  });
+
+  // Channel table
+  const channelNotes = {
+    "Organic / Direct":"Core channel. Protect organic rankings and CTA conversion.",
+    "Paid Search": period==="2026-04"?"Geo-exclusions recently applied. Early optimization phase &mdash; Feb rate was 45.8%.":period==="2026-02"?"Strong start at 45.8% quality rate before broader geo-targeting issues.":"Active optimization phase. Feb baseline: 45.8% quality rate.",
+    "Digital (Untracked)":"Likely best leads. Partly structural due to Apple ITP &amp; govt cookie blocking.",
+    "LinkedIn":"Small sample. Promising 40% rate &mdash; test with paid budget.",
+    "Other":"Negligible volume."
+  };
+  const tbody = document.querySelector("#channel-table tbody");
+  tbody.innerHTML = ch.filter(c=>c.total>0).map(c=>{
+    const qr = c.qual_rate;
+    const cls = qr>=35?"bg":qr>=20?"ba":"br";
+    return `<tr><td><strong>${c.channel}</strong></td><td>${c.total}</td><td>${c.quality}</td><td><span class="badge ${cls}">${qr}%</span></td><td style="font-size:11.5px;color:#556">${channelNotes[c.channel]||""}</td></tr>`;
+  }).join("");
+
+  const ps = ch.find(c=>c.channel==="Paid Search")||{total:0,quality:0,qual_rate:0};
+  const org = ch.find(c=>c.channel==="Organic / Direct")||{total:0,quality:0,qual_rate:0};
+  document.getElementById("q45-dynamic-answer").innerHTML = `
+    <strong>Organic / Direct</strong> leads this period with <strong>${org.total} leads and ${org.quality} quality leads (${org.qual_rate}% rate)</strong>.
+    <strong>Paid Search</strong> contributed <strong>${ps.total} leads at a ${ps.qual_rate}% quality rate</strong> &mdash;
+    ${period==="2026-02"?"a strong start for a brand-new program.":period==="2026-04"?"reflecting early-stage geo-targeting before exclusions were fully applied. February showed 45.8% quality rate when properly targeted.":"expect this rate to improve as geo-exclusions and negative keywords mature over the coming weeks."}
+  `;
+}
+
+function renderQ6(d, period) {
+  const spam = d.spam_countries;
+  const tbody = document.querySelector("#spam-table tbody");
+  if (spam.length===0) {
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:#888;padding:20px">No countries exceed the 50% disqualification threshold in this period (minimum 5 leads required)</td></tr>`;
+    document.getElementById("q6-dynamic-answer").innerHTML = `In this specific period, no single country crosses the 50% disqualification threshold with sufficient volume. Use the <strong>Full Year to Date</strong> view for the complete geo-exclusion list.`;
+  } else {
+    tbody.innerHTML = spam.map(c=>{
+      const dq = c.disq_pct;
+      const cls = dq>=80?"br":dq>=65?"br":"ba";
+      const action = dq>=65?"<span class='badge br'>Block immediately</span>":"<span class='badge ba'>Block ads; monitor</span>";
+      return `<tr><td>${c.Country}</td><td>${c.total}</td><td>${c.disq}</td><td><span class="badge ${cls}">${dq}%</span></td><td>${c.quality}</td><td>${action}</td></tr>`;
+    }).join("");
+    document.getElementById("q6-dynamic-answer").innerHTML = `
+      In this period, <strong>${spam.length} countries</strong> exceed the 50% disqualification threshold with sufficient volume.
+      All disqualifications in these countries are coded exclusively as &ldquo;bad information.&rdquo;
+      Geo-blocking these in Paid Search eliminates the spend waste with zero loss to commercial pipeline.
+    `;
+  }
+}
+
+function renderBonus(d, period) {
+  const indAll = d.industry_all.slice(0,10);
+  const indQ = d.industry_quality.slice(0,10);
+
+  destroyChart("industryAll");
+  charts["industryAll"] = new Chart(document.getElementById("industryAll"),{
+    type:"bar",
+    data:{labels:indAll.map(i=>i.industry||i.Industry),datasets:[{label:"All Leads",data:indAll.map(i=>i.count),backgroundColor:IND_COLORS}]},
+    options:{responsive:true,indexAxis:"y",plugins:{legend:{display:false}},scales:{x:{ticks:{font:{size:10}}},y:{ticks:{font:{size:9}}}}}
+  });
+
+  destroyChart("industryQual");
+  charts["industryQual"] = new Chart(document.getElementById("industryQual"),{
+    type:"bar",
+    data:{labels:indQ.map(i=>i.industry||i.Industry),datasets:[{label:"Quality Leads",data:indQ.map(i=>i.count),backgroundColor:IND_COLORS}]},
+    options:{responsive:true,indexAxis:"y",plugins:{legend:{display:false}},scales:{x:{ticks:{font:{size:10}}},y:{ticks:{font:{size:9}}}}}
+  });
+
+  const top1 = indQ[0];
+  const top2 = indQ[1];
+  document.getElementById("bonus-dynamic-answer").innerHTML = `
+    In this period, <strong>${top1?.industry||top1?.Industry||"—"} (${top1?.count||0} quality leads)</strong> and
+    <strong>${top2?.industry||top2?.Industry||"—"} (${top2?.count||0} quality leads)</strong> are the top two industries by quality pipeline.
+    Note that Education &amp; Research volume includes academic free-access requests &mdash; sales should triage this segment before SDR outreach.
+  `;
+}
+
+function renderVelocity() {
+  const trend = DATA.monthly_trend;
+  destroyChart("velocityChart");
+  charts["velocityChart"] = new Chart(document.getElementById("velocityChart"),{
+    type:"line",
+    data:{
+      labels:trend.map(t=>({
+        "2026-01":"Jan 2026","2026-02":"Feb 2026","2026-03":"Mar 2026","2026-04":"Apr 2026"
+      }[t.month]||t.month)),
+      datasets:[
+        {label:"Total Leads",data:trend.map(t=>t.total),borderColor:C.navy,backgroundColor:"rgba(10,15,44,0.07)",fill:true,tension:0.35,borderWidth:2.5,pointRadius:5},
+        {label:"Quality Leads",data:trend.map(t=>t.quality),borderColor:C.green,backgroundColor:"rgba(46,204,113,0.07)",fill:true,tension:0.35,borderWidth:2.5,pointRadius:5},
+        {label:"Disqualified",data:trend.map(t=>t.disq),borderColor:C.red,backgroundColor:"rgba(231,76,60,0.07)",fill:true,tension:0.35,borderWidth:2.5,pointRadius:5}
+      ]
+    },
+    options:{responsive:true,plugins:{legend:{position:"bottom",labels:{font:{size:11}}},title:{display:true,text:"Monthly Lead Velocity (Full Year to Date — always shown)",font:{size:12,weight:"600"}}},scales:{y:{ticks:{font:{size:10}}},x:{ticks:{font:{size:11}}}}}
+  });
+}
+
+// ============================================================
+// MAIN RENDER
+// ============================================================
+function render(period) {
+  const d = DATA[period];
+  if (!d) return;
+  renderKPIs(d);
+  renderQ1(d, period);
+  renderQ3(d, period);
+  renderQ45(d, period);
+  renderQ6(d, period);
+  renderBonus(d, period);
+  renderVelocity(); // always full year
+}
+
+// ============================================================
+// TABS
+// ============================================================
+let activePeriod = "all";
+document.querySelectorAll(".tab").forEach(btn=>{
+  btn.addEventListener("click",()=>{
+    document.querySelectorAll(".tab").forEach(b=>b.classList.remove("active"));
+    btn.classList.add("active");
+    activePeriod = btn.dataset.period;
+    render(activePeriod);
+  });
+});
+
+// Initial render
+render("all");
+</script>
+</body>
+</html>
